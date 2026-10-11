@@ -258,6 +258,21 @@
       ],
       "venue": "ul. Wiślana",
       "competition": "Sparing"
+    },
+    {
+      "date": "2026-10-11T13:00",
+      "opponent": "FC Guun Babice",
+      "logo": "assets/img/rywale/nowy-rywal.png",
+      "score": [
+        8,
+        8
+      ],
+      "pens": [
+        6,
+        5
+      ],
+      "home": true,
+      "competition": "Sparing"
     }
   ],
   "playerStats": {
