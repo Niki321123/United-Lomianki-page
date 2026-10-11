@@ -142,7 +142,7 @@ window.CLUB = {
     {
       date: "2026-10-11",
       title: "Ruszyła oficjalna strona klubu",
-      excerpt: "Terminarz, wyniki, kadra i kontakt – od dziś wszystko o Łomianki United w jednym miejscu.",
+      excerpt: "Terminarz, wyniki, kadra i statystyki – od dziś wszystko o Łomianki United w jednym miejscu.",
       body: [
         "Od dziś Łomianki United ma własną stronę internetową. Znajdziesz tu terminarz i wyniki meczów, kadrę zespołu oraz informacje o tym, gdzie i kiedy gramy.",
         "Na bieżąco relacje, zdjęcia i kulisy publikujemy też na Instagramie – zaobserwuj @lomianki_united."

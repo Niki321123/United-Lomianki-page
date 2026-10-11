@@ -23,7 +23,9 @@
   const fmtDate = new Intl.DateTimeFormat("pl-PL", { day: "numeric", month: "long", year: "numeric" });
 
   const igUrl = (handle) => `https://www.instagram.com/${encodeURIComponent(handle)}/`;
-  const ttUrl = (handle) => `https://www.tiktok.com/@${encodeURIComponent(handle)}`;
+  const igLink = (handle, name) => handle
+    ? `<a class="ig-link" href="${igUrl(handle)}" target="_blank" rel="noopener" aria-label="Instagram: ${esc(name)} (@${esc(handle)})" title="@${esc(handle)}">${window.ICONS ? window.ICONS.ig : "IG"}</a>`
+    : "";
   const initials = (name) => name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   /* ---------- Proste powiązania tekstu ---------- */
@@ -163,7 +165,7 @@
   const CAMERA_ICON = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 
   function personCard({ number, icon, name, meta, role, instagram, photo, captain }) {
-    const ig = instagram ? `<a href="${igUrl(instagram)}" target="_blank" rel="noopener">@${esc(instagram)}</a>` : "";
+    const ig = igLink(instagram, name);
     return `<li class="player">
       ${photo ? `<img class="player-photo" src="${esc(photo)}" alt="" loading="lazy" width="52" height="52">` : ""}
       <span class="player-number">${icon || esc(number)}</span>
@@ -191,8 +193,7 @@
     const photo = p.photo
       ? `<img class="fut-photo${/\.png$/i.test(p.photo) ? " fut-photo--cutout" : ""}" src="${esc(p.photo)}" alt="" loading="lazy">`
       : `<img class="fut-photo fut-photo--empty" src="${CREST}" alt="" loading="lazy">`;
-    const ig = p.instagram
-      ? `<a href="${igUrl(p.instagram)}" target="_blank" rel="noopener">@${esc(p.instagram)}</a>` : "";
+    const ig = igLink(p.instagram, p.name);
     return `<li class="fut-item">
       <article class="fut-card" aria-label="${esc(p.name)}, ${label} (${esc(pos)}), numer ${esc(p.number)}">
         <div class="fut-top">
@@ -209,7 +210,7 @@
           <span class="fut-number">#${esc(p.number)}</span>
         </div>
       </article>
-      <p class="fut-meta">${label} · ${esc(pos)}${p.role ? ` <span class="role-tag">${esc(p.role)}</span>` : ""}${ig ? "<br>" + ig : ""}</p>
+      <p class="fut-meta">${label} · ${esc(pos)}${p.role ? ` <span class="role-tag">${esc(p.role)}</span>` : ""}${ig}</p>
     </li>`;
   }
 
@@ -314,33 +315,15 @@
     }).join("");
   }
 
-  /* ---------- Kontakt ---------- */
-  const IG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>';
-  const TT_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.3 2.3 1.6 3.8 3.9 4v3.1c-1.4.1-2.7-.3-3.9-1v6.1c0 4.6-4.9 6.9-8.3 4.6C5.8 18.3 6 13.9 9.2 12.6c.9-.4 1.9-.5 2.9-.3v3.3c-.5-.2-1-.2-1.5-.1-1.5.4-1.9 2.3-.7 3.2 1.4 1 3.5.1 3.5-1.9V3h3.2z"/></svg>';
-
-  function renderContact() {
+  /* ---------- Przycisk „Zostań sponsorem” ---------- */
+  function renderSponsorLink() {
     const c = club.contact;
-    const rows = [];
-    if (c.email) rows.push(["E-mail", `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`]);
-    if (c.phone) rows.push(["Telefon", `<a href="tel:${esc(c.phone.replace(/\s/g, ""))}">${esc(c.phone)}</a>`]);
-    if ($("#contact-list")) {
-      $("#contact-list").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
-      $("#contact-list").hidden = !rows.length;
-    }
-
-    const socials = [];
-    if (c.instagram) socials.push(`<li><a class="social" href="${igUrl(c.instagram)}" target="_blank" rel="noopener" aria-label="Instagram @${esc(c.instagram)}" title="Instagram">${IG_ICON}</a></li>`);
-    if (c.tiktok) socials.push(`<li><a class="social" href="${ttUrl(c.tiktok)}" target="_blank" rel="noopener" aria-label="TikTok @${esc(c.tiktok)}" title="TikTok">${TT_ICON}</a></li>`);
-    if ($("#socials")) $("#socials").innerHTML = socials.join("");
-
-    if ($("#map-link")) $("#map-link").href = club.venue.mapUrl ||
-      "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(club.venue.mapQuery || club.venue.address);
-
     const mail = $("#sponsor-mail");
     if (!mail) return;
     if (c.email) mail.href = `mailto:${c.email}?subject=${encodeURIComponent("Sponsoring – " + club.name)}`;
     else if (c.instagram) { mail.href = igUrl(c.instagram); mail.target = "_blank"; mail.rel = "noopener"; }
   }
+
 
   function initReveal() {
     const io = new IntersectionObserver((entries) => {
@@ -356,6 +339,6 @@
   renderStats();
   if ($("#news-list")) renderNews();
   if ($("#sponsor-list")) renderSponsors();
-  renderContact();
+  renderSponsorLink();
   initReveal();
 })();

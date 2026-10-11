@@ -363,7 +363,7 @@ p { margin: 0 0 var(--space-4); max-width: 68ch; }
 .player:has(.captain) > div { padding-right: var(--space-5); }
 .player-name { font-weight: 600; line-height: 1.25; }
 .player-meta { font-size: var(--text-sm); color: var(--color-text-muted); }
-.player-meta a { display: block; font-size: var(--text-xs); color: var(--color-link); overflow-wrap: anywhere; }
+.player-meta .ig-link { width: 28px; height: 28px; margin: -4px 0 -4px var(--space-1); }
 .role-tag {
   display: inline-block; margin-left: var(--space-1); padding: 0 var(--space-2);
   border-radius: var(--radius-full); background: var(--ink); color: var(--gold-light);
@@ -422,8 +422,25 @@ a.sponsor:hover { border-color: var(--gold); }
 /* ---------- Stopka ---------- */
 .site-footer { background: var(--ink); color: var(--on-dark-muted); padding: var(--space-6) 0; font-size: var(--text-sm); }
 .footer-inner { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
-.footer-inner p { margin: 0; flex: 1; }
+.footer-inner p { margin: 0; }
 .footer-inner a { color: var(--gold-light); }
+.footer-socials { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--space-2); }
+.footer-socials .social {
+  width: 44px; height: 44px; background: transparent; color: var(--on-dark);
+  border-color: rgba(242,234,214,.2);
+}
+.footer-socials .social:hover { color: var(--gold-light); border-color: var(--gold); }
+.footer-socials .social svg { width: 20px; height: 20px; }
+.footer-top { margin-left: auto; }
+
+/* Ikonka Instagrama przy zawodniku */
+.ig-link {
+  display: inline-grid; place-items: center; width: 32px; height: 32px; margin-left: var(--space-1);
+  border-radius: 50%; color: var(--color-link); vertical-align: middle;
+  transition: background-color var(--dur-base), color var(--dur-base);
+}
+.ig-link:hover { background: var(--color-surface-2); }
+.ig-link svg { width: 18px; height: 18px; }
 .noscript { text-align: center; padding: var(--space-4); background: var(--gold); color: var(--ink); margin: 0; }
 
 /* ---------- Ruch ---------- */
