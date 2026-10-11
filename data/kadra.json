@@ -1,0 +1,393 @@
+{
+  "squad": [
+    {
+      "id": "sledziu",
+      "number": 1,
+      "name": "Śledziu",
+      "position": "GK",
+      "role": "Zarząd",
+      "instagram": "nmikolaj_",
+      "photo": "assets/img/kadra/1-sledziu.png",
+      "card": {
+        "rating": 86,
+        "pos": "GK",
+        "stats": [
+          86,
+          78,
+          70,
+          89,
+          80,
+          86
+        ]
+      }
+    },
+    {
+      "id": "tyszka",
+      "number": 25,
+      "name": "Tyszka",
+      "position": "GK",
+      "card": {
+        "rating": 87,
+        "pos": "GK",
+        "stats": [
+          89,
+          80,
+          75,
+          83,
+          76,
+          85
+        ]
+      }
+    },
+    {
+      "id": "jeremi",
+      "number": 4,
+      "name": "Jeremi",
+      "position": "DEF",
+      "instagram": "kozisynek",
+      "photo": "assets/img/kadra/4-jeremi.png",
+      "card": {
+        "rating": 86,
+        "pos": "LB",
+        "stats": [
+          85,
+          73,
+          78,
+          87,
+          84,
+          78
+        ]
+      }
+    },
+    {
+      "id": "komorniczak",
+      "number": 5,
+      "name": "Komorniczak",
+      "position": "DEF",
+      "instagram": "komorniczakk",
+      "photo": "assets/img/kadra/5-komorniczak.png",
+      "card": {
+        "rating": 86,
+        "pos": "CB",
+        "stats": [
+          86,
+          80,
+          76,
+          75,
+          85,
+          90
+        ]
+      }
+    },
+    {
+      "id": "malisz",
+      "number": 8,
+      "name": "Malisz",
+      "position": "DEF",
+      "instagram": "maliczesky_",
+      "card": {
+        "rating": 90,
+        "pos": "CB",
+        "stats": [
+          80,
+          79,
+          91,
+          81,
+          89,
+          84
+        ]
+      }
+    },
+    {
+      "id": "jozef",
+      "number": 13,
+      "name": "Józef",
+      "position": "DEF",
+      "instagram": "prettyflackojoseph",
+      "photo": "assets/img/kadra/13-jozef.jpg",
+      "card": {
+        "rating": 84,
+        "pos": "CB",
+        "stats": [
+          72,
+          69,
+          71,
+          64,
+          83,
+          88
+        ]
+      }
+    },
+    {
+      "id": "seku",
+      "number": 18,
+      "name": "Sęku",
+      "position": "DEF",
+      "instagram": "mikolaj1921",
+      "photo": "assets/img/kadra/18-seku.jpg",
+      "card": {
+        "rating": 88,
+        "pos": "CB",
+        "stats": [
+          86,
+          82,
+          85,
+          87,
+          83,
+          85
+        ]
+      }
+    },
+    {
+      "id": "bachul",
+      "number": 66,
+      "name": "Bachul",
+      "position": "DEF",
+      "role": "Zarząd",
+      "instagram": "j.bachulski",
+      "photo": "assets/img/kadra/66-bachul.jpg",
+      "card": {
+        "rating": 82,
+        "pos": "RB",
+        "stats": [
+          80,
+          69,
+          74,
+          70,
+          81,
+          93
+        ]
+      }
+    },
+    {
+      "id": "socha",
+      "number": 3,
+      "name": "Socha",
+      "position": "MID",
+      "instagram": "socha.sa",
+      "card": {
+        "rating": 94,
+        "pos": "CDM",
+        "stats": [
+          81,
+          90,
+          88,
+          87,
+          90,
+          85
+        ]
+      }
+    },
+    {
+      "id": "graba",
+      "number": 6,
+      "name": "Graba",
+      "position": "MID",
+      "role": "Zarząd",
+      "instagram": "m__grabowski",
+      "photo": "assets/img/kadra/6-graba.jpg",
+      "card": {
+        "rating": 83,
+        "pos": "LM",
+        "stats": [
+          50,
+          82,
+          83,
+          84,
+          74,
+          69
+        ]
+      }
+    },
+    {
+      "id": "wojtula",
+      "number": 11,
+      "name": "Wojtula",
+      "position": "MID",
+      "instagram": "w0jtulaa__",
+      "photo": "assets/img/kadra/11-wojtula.jpg",
+      "card": {
+        "rating": 86,
+        "pos": "RM",
+        "stats": [
+          90,
+          84,
+          80,
+          89,
+          64,
+          70
+        ]
+      }
+    },
+    {
+      "id": "bartas",
+      "number": 14,
+      "name": "Bartas",
+      "position": "MID",
+      "role": "Założyciel",
+      "instagram": "b.pokwicki",
+      "photo": "assets/img/kadra/14-bartas.png",
+      "card": {
+        "rating": 88,
+        "pos": "CM",
+        "stats": [
+          63,
+          80,
+          93,
+          90,
+          61,
+          95
+        ]
+      }
+    },
+    {
+      "id": "radek",
+      "number": 17,
+      "name": "Radek",
+      "position": "MID",
+      "card": {
+        "rating": 85,
+        "pos": "CM",
+        "stats": [
+          80,
+          83,
+          84,
+          83,
+          83,
+          86
+        ]
+      }
+    },
+    {
+      "id": "tycza",
+      "number": 21,
+      "name": "Tycza",
+      "position": "MID",
+      "photo": "assets/img/kadra/21-tycza.png",
+      "card": {
+        "rating": 94,
+        "pos": "CM",
+        "stats": [
+          88,
+          88,
+          88,
+          95,
+          90,
+          78
+        ]
+      }
+    },
+    {
+      "id": "pyczek",
+      "number": 67,
+      "name": "Pyczek",
+      "position": "MID",
+      "instagram": "alexpyczekk",
+      "photo": "assets/img/kadra/67-pyczek.jpg",
+      "card": {
+        "rating": 94,
+        "pos": "CAM",
+        "stats": [
+          93,
+          94,
+          89,
+          92,
+          86,
+          96
+        ]
+      }
+    },
+    {
+      "id": "kamil",
+      "number": 7,
+      "name": "Kamil",
+      "position": "FWD",
+      "instagram": "its.kamilek",
+      "card": {
+        "rating": 89,
+        "pos": "ST",
+        "stats": [
+          80,
+          87,
+          89,
+          92,
+          88,
+          81
+        ]
+      }
+    },
+    {
+      "id": "antek-kar",
+      "number": 9,
+      "name": "Antek Kar",
+      "position": "FWD",
+      "instagram": "antek2626",
+      "photo": "assets/img/kadra/9-antek-kar.jpg",
+      "card": {
+        "rating": 84,
+        "pos": "ST",
+        "stats": [
+          83,
+          89,
+          65,
+          75,
+          72,
+          98
+        ]
+      }
+    },
+    {
+      "id": "tymon",
+      "number": 10,
+      "name": "Tymon",
+      "position": "FWD",
+      "role": "Zarząd",
+      "instagram": "kowalczyk.tymon",
+      "card": {
+        "rating": 87,
+        "pos": "ST",
+        "stats": [
+          90,
+          85,
+          80,
+          89,
+          56,
+          70
+        ]
+      }
+    },
+    {
+      "id": "obluski",
+      "number": 99,
+      "name": "Obłuski",
+      "position": "FWD",
+      "captain": true,
+      "instagram": "whoisjasiu",
+      "photo": "assets/img/kadra/99-obluski.jpg",
+      "card": {
+        "rating": 93,
+        "pos": "ST",
+        "stats": [
+          95,
+          93,
+          89,
+          96,
+          50,
+          83
+        ]
+      }
+    }
+  ],
+  "media": [
+    {
+      "name": "Ida",
+      "role": "Media",
+      "instagram": "wlasnieidzieida"
+    },
+    {
+      "name": "Natasza",
+      "role": "Media",
+      "instagram": "natasza_klodawska"
+    }
+  ]
+}

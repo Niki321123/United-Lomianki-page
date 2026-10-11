@@ -11,12 +11,16 @@
   if (!club) return;
 
   // Wyniki, statystyki i aktualności doczytujemy z JSON-ów (zawsze świeża wersja)
-  const EMPTY = { record: { w: 0, d: 0, l: 0 }, fixtures: [], playerStats: {}, news: [] };
+  const EMPTY = { record: { w: 0, d: 0, l: 0 }, fixtures: [], playerStats: {}, news: [], squad: [], media: [] };
   const getJson = (url) => fetch(url, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  Promise.all([getJson("data/wyniki.json"), getJson("data/aktualnosci.json")])
-    .then(([results, news]) => { Object.assign(club, EMPTY, results || {}, news || {}); run(); });
+  Promise.all([getJson("data/wyniki.json"), getJson("data/aktualnosci.json"), getJson("data/kadra.json")])
+    .then(([results, news, squad]) => { Object.assign(club, EMPTY, results || {}, news || {}, squad || {}); run(); });
 
   function run() {
+    // Gole, asysty i MVP liczone z meczów + ręczne korekty (stats.js)
+    const totals = window.LUStats ? window.LUStats.compute(club.squad, club.fixtures, club.playerStats) : {};
+    if (window.LUDetails) window.LUDetails.setContext({ club, stats: totals });
+    const openPlayerById = (id) => window.LUDetails && window.LUDetails.openPlayer(club.squad.find((p) => p.id === id));
 
     const $ = (sel) => document.querySelector(sel);
     const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => (
@@ -53,7 +57,7 @@
 
     /* ---------- Mecze ---------- */
     const matches = club.fixtures
-      .map((m) => ({ ...m, when: new Date(m.date.length > 10 ? m.date : m.date + "T12:00") }))
+      .map((m, idx) => ({ ...m, idx, when: new Date(m.date.length > 10 ? m.date : m.date + "T12:00") }))
       .sort((a, b) => a.when - b.when);
     const now = new Date();
     const upcoming = matches.filter((m) => !m.score && m.when >= now);
@@ -125,6 +129,7 @@
       if (m.home !== undefined) tags.push(`<span class="fixture-side">${m.home ? "Dom" : "Wyjazd"}</span>`);
       const year = m.when.getFullYear() !== now.getFullYear() ? ` ${m.when.getFullYear()}` : "";
       return `<li class="fixture">
+        <button type="button" class="fixture-open" data-match="${m.idx}" aria-label="Szczegóły meczu z ${esc(m.opponent)}"></button>
         <div class="fixture-date"><span class="fixture-day">${fmtDay.format(m.when)}</span><span class="fixture-month">${fmtMonth.format(m.when)}${year}</span></div>
         <div><div class="fixture-teams">${teams}</div>
           ${tags.length || m.venue ? `<div class="fixture-info">${tags.join("")}${esc(m.venue || "")}</div>` : ""}</div>
@@ -205,7 +210,8 @@
         : `<img class="fut-photo fut-photo--empty" src="${CREST}" alt="" loading="lazy">`;
       const ig = igLink(p.instagram, p.name);
       return `<li class="fut-item">
-        <article class="fut-card" aria-label="${esc(p.name)}, ${label} (${esc(pos)}), numer ${esc(p.number)}">
+        <article class="fut-card">
+          <button type="button" class="fut-open" data-player="${esc(p.id)}" aria-label="Profil: ${esc(p.name)}, ${label} (${esc(pos)}), numer ${esc(p.number)}"></button>
           <div class="fut-top">
             <span class="fut-rating">${c.rating ? esc(c.rating) : "–"}</span>
             <span class="fut-pos">${esc(pos)}</span>
@@ -254,7 +260,7 @@
     function renderStats() {
       const table = $("#stats-table");
       if (!table) return;
-      const rows = club.squad.map((p) => ({ ...p, ...{ goals: 0, assists: 0, mvp: 0 }, ...(club.playerStats || {})[p.number] }));
+      const rows = club.squad.map((p) => ({ ...p, ...(totals[p.id] || { goals: 0, assists: 0, mvp: 0 }) }));
 
       // Liderzy: najlepszy w każdej kategorii (przy samych zerach – brak lidera)
       $("#leaders").innerHTML = Object.entries(STAT_COLS).map(([key, label]) => {
@@ -271,7 +277,7 @@
         const sorted = [...rows].sort((a, b) => b[sortKey] - a[sortKey] || b.goals - a.goals || a.number - b.number);
         table.tBodies[0].innerHTML = sorted.map((r) => `<tr>
           <td class="num">${esc(r.number)}</td>
-          <th scope="row"><span class="stats-player"><img src="${esc(r.photo || CREST)}" alt="" loading="lazy" width="32" height="32">${esc(r.name)}</span></th>
+          <th scope="row"><button type="button" class="stats-player" data-player="${esc(r.id)}"><img src="${esc(r.photo || CREST)}" alt="" loading="lazy" width="32" height="32">${esc(r.name)}</button></th>
           <td class="pos">${esc(String((r.card && r.card.pos) || r.position).toUpperCase())}</td>
           ${Object.keys(STAT_COLS).map((k) => `<td class="${k === sortKey ? "is-sorted" : ""}">${r[k]}</td>`).join("")}
         </tr>`).join("");
@@ -288,6 +294,10 @@
     /* ---------- Aktualności ---------- */
     function renderNews() {
       const items = [...club.news].sort((a, b) => b.date.localeCompare(a.date));
+      if (!items.length) {
+        $("#news-list").innerHTML = `<p class="news-empty">Wkrótce pojawią się tu pierwsze wpisy. Na bieżąco jesteśmy na Instagramie i TikToku.</p>`;
+        return;
+      }
       const coverOf = (n) => n.image || (n.gallery && n.gallery[0]) || "";
       $("#news-list").innerHTML = items.map((n, i) => `
         <article class="news-card reveal">
@@ -378,6 +388,14 @@
       }, { threshold: .15 });
       document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
     }
+
+    // Kliknięcie meczu / zawodnika otwiera okienko ze szczegółami
+    document.addEventListener("click", (e) => {
+      const m = e.target.closest("[data-match]");
+      if (m && window.LUDetails) return window.LUDetails.openMatch(club.fixtures[+m.dataset.match]);
+      const p = e.target.closest("[data-player]");
+      if (p) openPlayerById(p.dataset.player);
+    });
 
     // Każda podstrona ma tylko swoje sekcje – renderujemy to, co jest na stronie
     if ($("#next-match")) renderNextMatch();

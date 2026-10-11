@@ -272,104 +272,30 @@
         5
       ],
       "home": true,
-      "competition": "Sparing"
+      "competition": "Sparing",
+      "players": [
+        {
+          "id": "socha",
+          "g": 3,
+          "a": 1
+        },
+        {
+          "id": "bartas",
+          "g": 1,
+          "a": 3
+        },
+        {
+          "id": "radek",
+          "g": 1,
+          "a": 1
+        },
+        {
+          "id": "obluski",
+          "g": 3,
+          "a": 0
+        }
+      ]
     }
   ],
-  "playerStats": {
-    "1": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "3": {
-      "goals": 3,
-      "assists": 1,
-      "mvp": 0
-    },
-    "4": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "5": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "6": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "7": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "8": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "9": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "10": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "11": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "13": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "14": {
-      "goals": 1,
-      "assists": 3,
-      "mvp": 0
-    },
-    "17": {
-      "goals": 1,
-      "assists": 1,
-      "mvp": 0
-    },
-    "18": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "21": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "25": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "66": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "67": {
-      "goals": 0,
-      "assists": 0,
-      "mvp": 0
-    },
-    "99": {
-      "goals": 3,
-      "assists": 0,
-      "mvp": 0
-    }
-  }
+  "playerStats": {}
 }

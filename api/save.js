@@ -8,18 +8,18 @@
      GITHUB_TOKEN    – token GitHub z uprawnieniem "Contents: Read and write" do repo
      GITHUB_REPO     – opcjonalnie, domyślnie Niki321123/United-Lomianki-page
      GITHUB_BRANCH   – opcjonalnie, domyślnie main
-   Zapis = commit pliku data/wyniki.json albo data/aktualnosci.json (i obrazków) do repo,
+   Zapis = commit pliku data/wyniki.json, data/aktualnosci.json albo data/kadra.json (i obrazków) do repo,
    po którym Vercel sam przebudowuje stronę.
    ============================================================ */
 const crypto = require("crypto");
 
 const REPO = process.env.GITHUB_REPO || "Niki321123/United-Lomianki-page";
 const BRANCH = process.env.GITHUB_BRANCH || "main";
-const TARGETS = { wyniki: "data/wyniki.json", aktualnosci: "data/aktualnosci.json" };
-const IMAGE_DIRS = { rywale: "assets/img/rywale/", news: "assets/img/news/" };
+const TARGETS = { wyniki: "data/wyniki.json", aktualnosci: "data/aktualnosci.json", kadra: "data/kadra.json" };
+const IMAGE_DIRS = { rywale: "assets/img/rywale/", news: "assets/img/news/", kadra: "assets/img/kadra/" };
 // Kto może zapisywać który plik i do którego folderu wgrywać obrazki
 const ROLES = {
-  admin: { targets: ["wyniki", "aktualnosci"], dirs: ["rywale", "news"] },
+  admin: { targets: ["wyniki", "aktualnosci", "kadra"], dirs: ["rywale", "news", "kadra"] },
   news:  { targets: ["aktualnosci"], dirs: ["news"] }
 };
 const MAX_IMAGE_BYTES = 1200 * 1024;
@@ -28,6 +28,7 @@ const MAX_IMAGE_BYTES = 1200 * 1024;
 const isInt = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
 const isStr = (v, max) => typeof v === "string" && v.length <= max;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/;
+const ID_RE = /^[a-z0-9-]{1,40}$/;
 const LOGO_RE = /^assets\/img\/rywale\/[a-z0-9-]{1,60}\.(png|jpg|webp)$/;
 
 function cleanFixture(f, i) {
@@ -47,6 +48,19 @@ function cleanFixture(f, i) {
   if (f.home !== undefined && f.home !== null) { if (typeof f.home !== "boolean") err("zły dom/wyjazd"); out.home = f.home; }
   if (f.venue) { if (!isStr(f.venue, 120)) err("za długie miejsce"); out.venue = f.venue.trim(); }
   if (f.competition) { if (!isStr(f.competition, 40)) err("za długi rodzaj meczu"); out.competition = f.competition.trim(); }
+  // strzelcy i asystenci: [{ id, g, a }], MVP: id zawodnika
+  if (f.players !== undefined) {
+    if (!Array.isArray(f.players) || f.players.length > 40) err("zła lista strzelców");
+    const seen = new Set();
+    const rows = f.players.map((r) => {
+      if (!r || !isStr(r.id, 40) || !ID_RE.test(r.id) || seen.has(r.id)) err("zły lub powtórzony zawodnik w strzelcach");
+      if (!isInt(r.g, 0, 99) || !isInt(r.a, 0, 99)) err("zła liczba goli lub asyst");
+      seen.add(r.id);
+      return { id: r.id, g: r.g, a: r.a };
+    }).filter((r) => r.g || r.a);
+    if (rows.length) out.players = rows;
+  }
+  if (f.mvp) { if (!isStr(f.mvp, 40) || !ID_RE.test(f.mvp)) err("zły MVP"); out.mvp = f.mvp; }
   return out;
 }
 
@@ -56,16 +70,55 @@ function cleanData(d) {
   if (!["w", "d", "l"].every((k) => isInt(r[k], 0, 9999))) throw new Error("Zły bilans");
   if (!Array.isArray(d.fixtures) || d.fixtures.length > 1000) throw new Error("Zła lista meczów");
   const stats = {};
-  for (const [num, s] of Object.entries(d.playerStats || {})) {
-    if (!/^\d{1,3}$/.test(num) || !s || typeof s !== "object") throw new Error("Złe statystyki");
-    if (!["goals", "assists", "mvp"].every((k) => isInt(s[k], 0, 9999))) throw new Error(`Złe statystyki zawodnika nr ${num}`);
-    stats[num] = { goals: s.goals, assists: s.assists, mvp: s.mvp };
+  // ręczne korekty statystyk (klucz = id zawodnika); same zera pomijamy
+  for (const [id, s] of Object.entries(d.playerStats || {})) {
+    if (!ID_RE.test(id) || !s || typeof s !== "object") throw new Error("Złe statystyki");
+    if (!["goals", "assists", "mvp"].every((k) => isInt(s[k], -9999, 9999))) throw new Error(`Złe statystyki zawodnika ${id}`);
+    if (s.goals || s.assists || s.mvp) stats[id] = { goals: s.goals, assists: s.assists, mvp: s.mvp };
   }
   return {
     record: { w: r.w, d: r.d, l: r.l },
     fixtures: d.fixtures.map(cleanFixture).sort((a, b) => a.date.localeCompare(b.date)),
     playerStats: stats
   };
+}
+
+/* ---------- Kadra ---------- */
+const SQUAD_IMG_RE = /^assets\/img\/kadra\/[a-z0-9-]{1,80}\.(png|jpg|webp)$/;
+const HANDLE_RE = /^[A-Za-z0-9._]{1,30}$/;
+
+function cleanSquad(d) {
+  if (!d || !Array.isArray(d.squad) || d.squad.length > 80) throw new Error("Zła lista zawodników");
+  const ids = new Set();
+  const squad = d.squad.map((p, i) => {
+    const err = (m) => { throw new Error(`Zawodnik ${i + 1}: ${m}`); };
+    if (!p || typeof p !== "object") err("niepoprawne dane");
+    if (!isStr(p.id, 40) || !ID_RE.test(p.id) || ids.has(p.id)) err("zły lub powtórzony identyfikator");
+    ids.add(p.id);
+    if (!isInt(p.number, 0, 999)) err("zły numer");
+    if (!isStr(p.name, 40) || !p.name.trim()) err("brak imienia/ksywki");
+    if (!["GK", "DEF", "MID", "FWD"].includes(p.position)) err("zła formacja");
+    const out = { id: p.id, number: p.number, name: p.name.trim(), position: p.position };
+    if (p.role) { if (!["Zarząd", "Założyciel"].includes(p.role)) err("zła funkcja"); out.role = p.role; }
+    if (p.captain) out.captain = true;
+    if (p.instagram) { if (!isStr(p.instagram, 30) || !HANDLE_RE.test(p.instagram)) err("zły Instagram"); out.instagram = p.instagram; }
+    if (p.photo) { if (!isStr(p.photo, 120) || !SQUAD_IMG_RE.test(p.photo)) err("zła ścieżka zdjęcia"); out.photo = p.photo; }
+    if (p.card) {
+      const c = p.card;
+      if (!isInt(c.rating, 1, 99) || !isStr(c.pos, 4) || !/^[A-Z]{2,4}$/.test(c.pos)) err("zła ocena lub pozycja na karcie");
+      if (!Array.isArray(c.stats) || c.stats.length !== 6 || !c.stats.every((n) => isInt(n, 1, 99))) err("złe statystyki karty");
+      out.card = { rating: c.rating, pos: c.pos, stats: c.stats };
+    }
+    return out;
+  });
+  const media = (d.media || []).map((m, i) => {
+    if (!m || !isStr(m.name, 40) || !m.name.trim() || !isStr(m.role || "", 30)) throw new Error(`Media ${i + 1}: złe dane`);
+    const out = { name: m.name.trim(), role: (m.role || "Media").trim() };
+    if (m.instagram) { if (!HANDLE_RE.test(m.instagram)) throw new Error(`Media ${i + 1}: zły Instagram`); out.instagram = m.instagram; }
+    return out;
+  });
+  if (media.length > 20) throw new Error("Za dużo osób w mediach");
+  return { squad, media };
 }
 
 /* ---------- Aktualności ---------- */
@@ -216,12 +269,12 @@ module.exports = async function handler(req, res) {
     if (!TARGETS[target]) throw new Error("Nieznany plik do zapisu");
     const img = body.image || body.logo;
     if (!allowed.targets.includes(target) || (img && !allowed.dirs.includes(img.dir || "rywale"))) return deny();
-    const data = target === "aktualnosci" ? cleanNews(body.data) : cleanData(body.data);
+    const data = target === "aktualnosci" ? cleanNews(body.data) : target === "kadra" ? cleanSquad(body.data) : cleanData(body.data);
     const entries = cleanBlobs(body.blobs, allowed.dirs);
     const image = cleanImage(img);
     if (image) entries.push({ path: image.path, sha: await createBlob(image.base64) });
     entries.push({ path: TARGETS[target], content: JSON.stringify(data, null, 2) + "\n" });
-    const what = { aktualnosci: "aktualności", wyniki: "wyniki i statystyki" }[target];
+    const what = { aktualnosci: "aktualności", wyniki: "wyniki i statystyki", kadra: "kadra" }[target];
     const files = entries.length - 1;
     const commit = await commitFiles(entries, `Panel admina (${who.label}): ${what}${files ? ` (+${files} ${files === 1 ? "obrazek" : "obrazków"})` : ""}`);
     return res.status(200).json({ ok: true, commit, image: image ? image.path : null });
@@ -232,4 +285,5 @@ module.exports = async function handler(req, res) {
 
 module.exports.cleanData = cleanData;
 module.exports.cleanNews = cleanNews;
+module.exports.cleanSquad = cleanSquad;
 module.exports.cleanImage = cleanImage;

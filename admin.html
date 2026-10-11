@@ -8,16 +8,18 @@
   <meta name="theme-color" content="#141414">
   <link rel="icon" href="assets/img/herb.png" type="image/png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+  <link rel="preload" href="assets/fonts/barlow-condensed-800-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/fonts.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/admin.css">
 
   <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/stats.js" defer></script>
   <script src="assets/js/layout.js" defer></script>
   <script src="assets/js/admin.js" defer></script>
   <script src="assets/js/admin-news.js" defer></script>
+  <script src="assets/js/admin-squad.js" defer></script>
 </head>
 <body id="top">
   <a class="skip-link" href="#main">Przejdź do treści</a>
@@ -28,7 +30,7 @@
       <div class="container">
         <div class="section-head">
           <h1 class="page-title">Panel admina</h1>
-          <p class="section-sub">Wyniki, terminarz, bilans, statystyki i aktualności</p>
+          <p class="section-sub">Wyniki, terminarz, bilans, statystyki, kadra i aktualności</p>
         </div>
 
         <!-- Logowanie -->
@@ -48,6 +50,7 @@
             <button role="tab" id="tab-matches" data-roles="admin" aria-controls="panel-matches" aria-selected="true">Mecze</button>
             <button role="tab" id="tab-stats" data-roles="admin" aria-controls="panel-stats" aria-selected="false" tabindex="-1">Statystyki</button>
             <button role="tab" id="tab-record" data-roles="admin" aria-controls="panel-record" aria-selected="false" tabindex="-1">Bilans</button>
+            <button role="tab" id="tab-squad" data-roles="admin" aria-controls="panel-squad" aria-selected="false" tabindex="-1">Kadra</button>
             <button role="tab" id="tab-news" data-roles="admin news" aria-controls="panel-news" aria-selected="false" tabindex="-1">Aktualności</button>
           </div>
 
@@ -58,6 +61,7 @@
           </div>
 
           <div role="tabpanel" id="panel-stats" aria-labelledby="tab-stats" hidden>
+            <p class="admin-hint">Liczby sumują się same z meczów (Mecze → „Strzelcy i asysty” oraz MVP). Tutaj możesz je ręcznie poprawić – zmiana zapisze się jako korekta.</p>
             <div class="stats-wrap">
               <table class="stats-table admin-stats">
                 <thead><tr><th>#</th><th>Zawodnik</th><th>Gole</th><th>Asysty</th><th>MVP</th></tr></thead>
@@ -74,6 +78,17 @@
             </div>
             <button class="btn admin-secondary" type="button" id="rec-calc">Przelicz z terminarza</button>
             <p class="admin-hint">„Przelicz” liczy tylko mecze wpisane w terminarzu (karne rozstrzygają remis).</p>
+          </div>
+
+          <div role="tabpanel" id="panel-squad" aria-labelledby="tab-squad" hidden>
+            <h2 class="admin-h2">Zawodnicy</h2>
+            <button class="btn btn-primary admin-add" type="button" id="add-player">+ Dodaj zawodnika</button>
+            <p class="admin-hint">Kliknij zdjęcie, żeby je zmienić. Przy zaznaczonym „Wytnij tło” zostaje sama osoba, jak na karcie FIFA (za pierwszym razem trwa to dłużej). Boczne pozycje (LB, RB, LM, RM, LW, RW) opisują się na stronie jako wahadłowy / skrzydłowy.</p>
+            <ol class="admin-matches" id="squad-admin"></ol>
+
+            <h2 class="admin-h2">Media</h2>
+            <ul class="admin-ships" id="media-admin"></ul>
+            <button class="btn admin-secondary" type="button" id="add-media">+ Dodaj osobę</button>
           </div>
 
           <div role="tabpanel" id="panel-news" aria-labelledby="tab-news" hidden>
@@ -94,6 +109,11 @@
   <footer class="site-footer" id="site-footer"></footer>
 
   <datalist id="opponents"></datalist>
+  <datalist id="card-positions">
+    <option value="GK"></option><option value="CB"></option><option value="LB"></option><option value="RB"></option>
+    <option value="CDM"></option><option value="CM"></option><option value="CAM"></option><option value="LM"></option>
+    <option value="RM"></option><option value="LW"></option><option value="RW"></option><option value="ST"></option>
+  </datalist>
   <datalist id="competitions">
     <option value="Sparing"></option>
     <option value="Liga WLO"></option>

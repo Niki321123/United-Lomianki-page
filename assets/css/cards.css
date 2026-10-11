@@ -150,3 +150,74 @@
   .stats-table th, .stats-table td { padding: var(--space-2); }
   .stats-table .pos { display: none; }
 }
+
+/* ============================================================
+   Klikane karty, wiersze terminarza i okienka szczegółów
+   ============================================================ */
+.fut-open { position: absolute; inset: 0; z-index: 3; border: 0; background: none; cursor: pointer; border-radius: 12px; }
+.fut-open:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+.fixture { position: relative; transition: border-color var(--dur-base); }
+.fixture:hover { border-color: var(--gold); }
+.fixture-open { position: absolute; inset: 0; z-index: 1; border: 0; background: none; cursor: pointer; border-radius: var(--radius-md); }
+.fixture-open:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+button.stats-player { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+button.stats-player:hover { color: var(--color-link); }
+
+.detail-dialog {
+  width: min(100% - 2rem, 640px); max-height: min(92vh, 900px); border: 0; border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6) var(--space-6); background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-3);
+}
+.detail-dialog::backdrop { background: rgba(10,10,10,.7); }
+.detail-dialog h3 { font-size: var(--text-lg); margin: var(--space-5) 0 var(--space-2); }
+.detail-muted { color: var(--color-text-muted); margin: 0; }
+.detail-link { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--color-link); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+.detail-match { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-4); text-align: center; margin: var(--space-4) 0; }
+.detail-team { display: grid; justify-items: center; gap: var(--space-2); font-family: var(--font-display); font-weight: 700; text-transform: uppercase; line-height: 1.1; }
+.detail-team img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+.detail-initials { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: var(--color-surface-2); font-size: var(--text-2xl); }
+.detail-score { font-family: var(--font-display); font-size: var(--text-4xl); font-weight: 800; line-height: 1; display: grid; }
+.detail-score small { font: 600 var(--text-sm) var(--font-sans); color: var(--color-text-muted); }
+.detail-vs { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-link); font-weight: 800; }
+.detail-meta { text-align: center; color: var(--color-text-muted); font-size: var(--text-sm); margin: 0 auto; }
+.detail-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.detail-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.detail-list li { display: flex; justify-content: space-between; gap: var(--space-2); padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-border); }
+.detail-mvp p { margin: 0; font-size: var(--text-lg); }
+
+.detail-player { display: grid; grid-template-columns: 160px 1fr; gap: var(--space-5); align-items: start; }
+.detail-photo { position: relative; aspect-ratio: 0.85; border-radius: var(--radius-md); overflow: hidden;
+  background: linear-gradient(160deg, var(--fut-gold-1), var(--fut-gold-3)); }
+.detail-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.detail-photo img.is-crest { object-fit: contain; padding: 18%; opacity: .5; }
+.detail-number { position: absolute; left: var(--space-2); bottom: var(--space-2); padding: 0 var(--space-2); border-radius: var(--radius-sm);
+  background: var(--ink); color: var(--gold-light); font: 800 var(--text-lg) var(--font-display); }
+.detail-name { font-size: var(--text-3xl); margin-bottom: var(--space-2); }
+.detail-rating { margin: 0 0 var(--space-2); color: var(--color-text-muted); }
+.detail-rating strong { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-link); margin-right: var(--space-1); }
+.detail-attrs { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-1); margin: 0 0 var(--space-3); text-align: center; }
+.detail-attrs dt { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; }
+.detail-attrs dd { margin: 0; font: 800 var(--text-lg) var(--font-display); }
+.detail-ig { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 600; min-height: 44px; }
+.detail-ig svg { width: 20px; height: 20px; }
+.detail-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); margin: var(--space-5) 0 0; }
+.detail-totals div { background: var(--ink); color: var(--on-dark); border-radius: var(--radius-md); padding: var(--space-3); text-align: center; border-top: 3px solid var(--gold); }
+.detail-totals dt { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .1em; color: var(--on-dark-muted); }
+.detail-totals dd { margin: 0; font: 800 var(--text-3xl) var(--font-display); color: var(--gold-light); }
+.detail-games { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.detail-game {
+  width: 100%; display: grid; grid-template-columns: 96px 1fr auto auto; gap: var(--space-3); align-items: center; text-align: left;
+  padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; cursor: pointer;
+}
+.detail-game:hover { border-color: var(--gold); }
+.detail-game span:first-child { color: var(--color-text-muted); font-size: var(--text-sm); }
+.detail-game em { font-style: normal; font-family: var(--font-display); font-weight: 800; }
+.detail-game-stats { font-size: var(--text-sm); white-space: nowrap; }
+
+@media (max-width: 560px) {
+  .detail-player { grid-template-columns: 1fr; }
+  .detail-photo { max-width: 200px; }
+  .detail-cols { grid-template-columns: 1fr; }
+  .detail-game { grid-template-columns: 1fr auto; }
+  .detail-game span:first-child { grid-column: 1 / -1; }
+}

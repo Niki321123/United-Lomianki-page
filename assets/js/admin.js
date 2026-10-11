@@ -17,6 +17,7 @@
 
   let password = "";
   let data = null;          // { record, fixtures, playerStats }
+  let squad = [];           // zawodnicy z data/kadra.json (do list strzelców i statystyk)
   let pendingLogo = null;   // { index, slug, base64 } – jedno nowe logo na zapis
   let dirty = false;
 
@@ -65,11 +66,13 @@
   async function loadData() {
     if (window.AdminNews) await window.AdminNews.load();
     if (role !== "admin") return;          // admin aktualności nie potrzebuje reszty
+    if (window.AdminSquad) await window.AdminSquad.load();
     const res = await fetch("data/wyniki.json", { cache: "no-store" });
     data = await res.json();
     data.fixtures = data.fixtures || [];
     data.playerStats = data.playerStats || {};
     data.record = data.record || { w: 0, d: 0, l: 0 };
+    squad = ((await (await fetch("data/kadra.json", { cache: "no-store" })).json()).squad) || [];
     $("#opponents").innerHTML = [...new Set(data.fixtures.map((f) => f.opponent))]
       .map((o) => `<option value="${esc(o)}"></option>`).join("");
     renderMatches(); renderStats(); renderRecord();
@@ -93,7 +96,7 @@
     selectTab(visible[0]);
     $("#admin-role").textContent = role === "admin" ? "Zalogowano jako: pełny admin" : "Zalogowano jako: admin aktualności";
   }
-  allTabs().forEach((t) => t.addEventListener("click", () => selectTab(t)));
+  allTabs().forEach((t) => t.addEventListener("click", () => { selectTab(t); if (t.id === "tab-stats" && data) renderStats(); }));
 
   /* ---------- Mecze ---------- */
   const knownLogos = () => {
@@ -135,10 +138,36 @@
           <option value="away"${side === "away" ? " selected" : ""}>Wyjazd</option></select></label>
         <label class="w-comp">Rodzaj <input type="text" data-k="competition" list="competitions" maxlength="40" value="${esc(f.competition || "")}"></label>
         <label class="w-venue">Miejsce <input type="text" data-k="venue" maxlength="120" value="${esc(f.venue || "")}"></label>
+        ${scorersBlock(f)}
       </div>
       <button class="admin-del" type="button" data-del="${i}" aria-label="Usuń mecz z ${esc(f.opponent)}">Usuń</button>
     </li>`;
   }
+
+  // Lista „Strzelcy i asysty” + MVP w wierszu meczu
+  const sortedSquad = () => [...squad].sort((a, b) => a.number - b.number);
+  const playerOptions = (sel, empty) => (empty ? `<option value="">${empty}</option>` : "") +
+    sortedSquad().map((p) => `<option value="${esc(p.id)}"${p.id === sel ? " selected" : ""}>${p.number}. ${esc(p.name)}</option>`).join("");
+  function scorersBlock(f) {
+    const rows = f.players || [];
+    const goals = rows.reduce((n, r) => n + (r.g || 0), 0);
+    const check = f.score ? (goals === f.score[0] ? `<span class="ok">✓ zgadza się z wynikiem</span>`
+      : `<span class="warn">gole zawodników: ${goals}, wynik: ${f.score[0]}</span>`) : "";
+    return `<div class="w-full admin-scorers">
+      <p class="admin-gallery-title">Strzelcy i asysty ${check}</p>
+      <ul class="admin-pl">${rows.map((r) => `<li>
+        <select data-pl="id" aria-label="Zawodnik">${playerOptions(r.id)}</select>
+        <label>Gole <input type="number" min="0" max="99" data-pl="g" value="${r.g || 0}"></label>
+        <label>Asysty <input type="number" min="0" max="99" data-pl="a" value="${r.a || 0}"></label>
+        <button type="button" class="admin-pl-del" data-pl-del aria-label="Usuń zawodnika z listy">×</button></li>`).join("")}
+      </ul>
+      <div class="admin-pl-foot">
+        <button type="button" class="admin-thumb-add admin-pl-add" data-pl-add>+ Dodaj zawodnika</button>
+        <label class="admin-mvp">MVP meczu <select data-k="mvp">${playerOptions(f.mvp, "— brak —")}</select></label>
+      </div>
+    </div>`;
+  }
+  const refreshRow = (i) => { const li = $(`#matches .admin-match[data-i="${i}"]`); if (li) li.outerHTML = matchRow(data.fixtures[i], i); };
 
   function renderMatches() {
     // najnowsze na górze
@@ -161,6 +190,14 @@
     const logo = v("logo");
     if (logo && logo !== "__upload") f.logo = logo;
     if (!logo) delete f.logo;
+    // strzelcy i asysty (puste wiersze zostawiamy w edytorze, serwer je pominie)
+    f.players = [...li.querySelectorAll(".admin-pl li")].map((row) => ({
+      id: $('[data-pl="id"]', row).value,
+      g: Math.max(0, parseInt($('[data-pl="g"]', row).value, 10) || 0),
+      a: Math.max(0, parseInt($('[data-pl="a"]', row).value, 10) || 0)
+    }));
+    if (!f.players.length) delete f.players;
+    if (v("mvp")) f.mvp = v("mvp"); else delete f.mvp;
   }
 
   $("#matches").addEventListener("input", (e) => {
@@ -188,6 +225,34 @@
         markDirty();
       } catch (err) { setMsg("#save-msg", err.message, "error"); }
     }
+  });
+
+  // dodawanie / usuwanie strzelców
+  $("#matches").addEventListener("click", (e) => {
+    const li = e.target.closest(".admin-match");
+    if (!li) return;
+    const i = +li.dataset.i, f = data.fixtures[i];
+    if (e.target.closest("[data-pl-add]")) {
+      readRow(li);
+      const used = new Set((f.players || []).map((r) => r.id));
+      const next = sortedSquad().find((p) => !used.has(p.id));
+      if (!next) return;
+      (f.players = f.players || []).push({ id: next.id, g: 1, a: 0 });
+      refreshRow(i); markDirty();
+    }
+    const del = e.target.closest("[data-pl-del]");
+    if (del) {
+      del.closest("li").remove(); readRow(li); refreshRow(i); markDirty();
+    }
+  });
+  // licznik „zgadza się z wynikiem” odświeżamy bez przebudowy wiersza (kursor zostaje na miejscu)
+  $("#matches").addEventListener("input", (e) => {
+    if (!e.target.closest(".admin-pl, [data-k='s0'], [data-k='s1']")) return;
+    const li = e.target.closest(".admin-match");
+    const title = $(".admin-scorers .admin-gallery-title", li);
+    const tmp = document.createElement("div");
+    tmp.innerHTML = scorersBlock(data.fixtures[+li.dataset.i]);
+    title.innerHTML = $(".admin-gallery-title", tmp).innerHTML;
   });
 
   $("#matches").addEventListener("click", (e) => {
@@ -227,23 +292,29 @@
 
   /* ---------- Statystyki ---------- */
   const STAT_KEYS = ["goals", "assists", "mvp"];
+  // Wyświetlamy sumę (mecze + korekta); zmiana sumy zapisuje się jako korekta
+  const fromMatches = () => window.LUStats.compute(squad, data.fixtures, {});
   function renderStats() {
-    const squad = [...club.squad].sort((a, b) => a.number - b.number);
-    $("#stats-body").innerHTML = squad.map((p) => {
-      const s = data.playerStats[p.number] || { goals: 0, assists: 0, mvp: 0 };
-      return `<tr data-n="${p.number}"><td class="num">${p.number}</td><th scope="row">${esc(p.name)}</th>
+    const auto = fromMatches();
+    $("#stats-body").innerHTML = sortedSquad().map((p) => {
+      const a = auto[p.id], c = data.playerStats[p.id] || {};
+      return `<tr data-id="${esc(p.id)}"><td class="num">${p.number}</td><th scope="row">${esc(p.name)}</th>
         ${STAT_KEYS.map((k) => `<td><div class="stepper">
           <button type="button" data-step="-1" data-k="${k}" aria-label="${esc(p.name)}: mniej">−</button>
-          <input type="number" min="0" max="9999" data-k="${k}" value="${s[k]}" aria-label="${esc(p.name)}: ${k}">
-          <button type="button" data-step="1" data-k="${k}" aria-label="${esc(p.name)}: więcej">+</button></div></td>`).join("")}
+          <input type="number" min="0" max="9999" data-k="${k}" value="${a[k] + (c[k] || 0)}" aria-label="${esc(p.name)}: ${k}">
+          <button type="button" data-step="1" data-k="${k}" aria-label="${esc(p.name)}: więcej">+</button></div>
+          <small class="admin-auto">z meczów: ${a[k]}${c[k] ? `, korekta ${c[k] > 0 ? "+" : ""}${c[k]}` : ""}</small></td>`).join("")}
       </tr>`;
     }).join("");
   }
   function setStat(tr, k, value) {
-    const n = tr.dataset.n;
-    const s = data.playerStats[n] || (data.playerStats[n] = { goals: 0, assists: 0, mvp: 0 });
-    s[k] = Math.max(0, Math.min(9999, parseInt(value, 10) || 0));
-    $(`input[data-k="${k}"]`, tr).value = s[k];
+    const id = tr.dataset.id;
+    const auto = fromMatches()[id][k];
+    const total = Math.max(0, Math.min(9999, parseInt(value, 10) || 0));
+    const c = data.playerStats[id] || (data.playerStats[id] = { goals: 0, assists: 0, mvp: 0 });
+    c[k] = total - auto;
+    if (!c.goals && !c.assists && !c.mvp) delete data.playerStats[id];
+    renderStats();
     markDirty();
   }
   $("#stats-body").addEventListener("click", (e) => {
@@ -290,6 +361,7 @@
     const jobs = [];
     if (dirty) jobs.push(saveResults);
     if (window.AdminNews && window.AdminNews.isDirty()) jobs.push(window.AdminNews.save);
+    if (window.AdminSquad && window.AdminSquad.isDirty()) jobs.unshift(window.AdminSquad.save);   // kadra najpierw
     if (!jobs.length) return setMsg("#save-msg", "Brak zmian do zapisania.");
     const btn = $("#save"); btn.disabled = true;
     setMsg("#save-msg", "Zapisuję…");
@@ -302,11 +374,15 @@
   });
 
   window.addEventListener("beforeunload", (e) => {
-    if (dirty || (window.AdminNews && window.AdminNews.isDirty())) {
+    if (dirty || (window.AdminNews && window.AdminNews.isDirty()) || (window.AdminSquad && window.AdminSquad.isDirty())) {
       e.preventDefault(); e.returnValue = "";
     }
   });
 
   // Wspólne narzędzia dla edytora aktualności (admin-news.js)
-  window.Admin = { api, esc, slugify, setMsg, $ };
+  window.Admin = {
+    api, esc, slugify, setMsg, $,
+    // zakładka Kadra po zapisie podmienia listę zawodników
+    setSquad(list) { squad = list; if (data) { renderMatches(); renderStats(); } }
+  };
 })();

@@ -495,3 +495,4 @@ main > .section:first-child { padding-top: var(--space-10); }
 .photo-prev { left: var(--space-4); }
 .photo-next { right: var(--space-4); }
 .photo-count { position: fixed; bottom: var(--space-4); left: 0; right: 0; margin: 0 auto; text-align: center; color: #ddd; font-weight: 600; }
+.news-empty { grid-column: 1 / -1; color: var(--color-text-muted); padding: var(--space-6) 0; }
