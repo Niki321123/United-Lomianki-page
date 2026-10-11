@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kadra – Łomianki United</title>
+  <meta name="description" content="Kadra, zarząd i media Łomianki United.">
+  <meta name="theme-color" content="#141414">
+  <link rel="icon" href="assets/img/herb.png" type="image/png">
+
+  <meta property="og:title" content="Kadra – Łomianki United">
+  <meta property="og:description" content="Kadra, zarząd i media Łomianki United.">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/cards.css">
+
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/layout.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Przejdź do treści</a>
+  <header class="site-header" id="site-header"></header>
+
+  <main id="main">
+    <!-- KADRA I ZARZĄD -->
+    <section id="kadra" class="section" aria-labelledby="squad-title">
+      <div class="container">
+        <div class="section-head">
+          <h1 id="squad-title" class="page-title">Kadra</h1>
+          <p class="section-sub" data-bind="season"></p>
+        </div>
+        <div id="squad"></div>
+
+        <h3 class="subhead" id="board-title">Zarząd</h3>
+        <ul class="player-grid" id="board-list"></ul>
+
+        <h3 class="subhead" id="media-title">Media</h3>
+        <ul class="player-grid" id="media-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <noscript>
+    <p class="noscript">Włącz JavaScript, aby zobaczyć treść strony.</p>
+  </noscript>
+</body>
+</html>

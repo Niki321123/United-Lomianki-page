@@ -1,0 +1,7 @@
+# Lokalna konfiguracja narzędzi
+.claude/
+
+# Pliki systemowe
+Thumbs.db
+Desktop.ini
+.DS_Store

@@ -1,0 +1,152 @@
+/* ============================================================
+   ŁOMIANKI UNITED — karty zawodników w stylu FIFA (sekcja Kadra)
+   ============================================================ */
+
+:root {
+  --fut-ink:   #3a2c0e;   /* brązowy tekst na złotej karcie */
+  --fut-gold-1: #fbefb8;
+  --fut-gold-2: #ecd27e;
+  --fut-gold-3: #d2ab4c;
+  --fut-gold-4: #b8913f;
+}
+
+.fut-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-6) var(--space-4);
+}
+.fut-item { display: flex; flex-direction: column; align-items: center; }
+
+.fut-card {
+  position: relative; width: 100%; max-width: 220px; aspect-ratio: 0.72;
+  color: var(--fut-ink);
+  container-type: inline-size;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.fut-card:hover { transform: translateY(-4px) rotate(-.5deg); }
+
+/* Złote tło w kształcie karty */
+.fut-card::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  clip-path: polygon(8% 4%, 22% 2.5%, 34% 0.5%, 50% 0%, 66% 0.5%, 78% 2.5%, 92% 4%, 100% 9%,
+                     100% 86%, 93% 90%, 72% 93.5%, 50% 100%, 28% 93.5%, 7% 90%, 0% 86%, 0% 9%);
+  background:
+    linear-gradient(118deg, transparent 0 46%, rgba(255,255,255,.35) 47%, transparent 52% 100%),
+    repeating-linear-gradient(62deg, rgba(255,255,255,.10) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg, var(--fut-gold-1) 0%, var(--fut-gold-2) 34%, var(--fut-gold-3) 70%, var(--fut-gold-2) 100%);
+}
+.fut-card > * { position: relative; z-index: 1; }
+
+.fut-top {
+  position: absolute; left: 11%; top: 11%; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; line-height: .9;
+}
+.fut-rating { font-family: var(--font-display); font-weight: 800; font-size: 22cqi; letter-spacing: -.02em; }
+.fut-pos { font-family: var(--font-display); font-weight: 700; font-size: 10cqi; margin-top: 1cqi; }
+.fut-captain {
+  margin-top: 4cqi; width: 11cqi; height: 11cqi; border-radius: 50%;
+  display: grid; place-items: center; background: var(--fut-ink); color: var(--fut-gold-1);
+  font: 700 6.5cqi/1 var(--font-sans);
+}
+
+.fut-photo {
+  position: absolute; right: 4%; top: 6%; width: 64%; height: 52%;
+  object-fit: cover; object-position: center top;
+  -webkit-mask-image: radial-gradient(ellipse 72% 68% at 55% 42%, #000 58%, transparent 100%);
+          mask-image: radial-gradient(ellipse 72% 68% at 55% 42%, #000 58%, transparent 100%);
+}
+/* Wycięta sylwetka (PNG bez tła) – jak na prawdziwej karcie */
+.fut-photo--cutout {
+  top: 4%; right: 2%; width: 68%; height: 54%;
+  object-fit: contain; object-position: center bottom;
+  -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 82%, transparent 100%);
+  filter: drop-shadow(0 2px 4px rgba(58,44,14,.25));
+}
+.fut-photo--empty { object-fit: contain; padding: 10%; opacity: .35; filter: sepia(1) saturate(.6); }
+
+.fut-name {
+  position: absolute; left: 6%; right: 6%; top: 57%; margin: 0;
+  text-align: center; font-family: var(--font-display); font-weight: 800;
+  font-size: 11cqi; line-height: 1; text-transform: none; letter-spacing: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding-bottom: 2.5cqi; border-bottom: 1px solid rgba(58,44,14,.25);
+}
+
+.fut-stats {
+  position: absolute; left: 7%; right: 7%; top: 68.5%; margin: 0;
+  display: grid; grid-template-columns: repeat(6, 1fr); text-align: center;
+}
+.fut-stats dt { font: 600 5.6cqi/1 var(--font-sans); letter-spacing: .02em; opacity: .85; }
+.fut-stats dd { margin: 1cqi 0 0; font-family: var(--font-display); font-weight: 800; font-size: 10cqi; line-height: 1; }
+
+.fut-foot {
+  position: absolute; left: 0; right: 0; top: 82%;
+  display: flex; align-items: center; justify-content: center; gap: 4cqi;
+}
+.fut-foot img { width: 9cqi; height: auto; }
+.fut-flag {
+  width: 11cqi; height: 7cqi; border-radius: 1px;
+  background: linear-gradient(#fff 0 50%, #dc143c 50% 100%);
+  box-shadow: 0 0 0 1px rgba(58,44,14,.25);
+}
+.fut-number { font-family: var(--font-display); font-weight: 800; font-size: 7.5cqi; }
+
+.fut-meta {
+  margin: var(--space-3) 0 0; text-align: center; font-size: var(--text-sm);
+  color: var(--color-text-muted); line-height: 1.5;
+}
+.fut-meta a { color: var(--color-link); font-size: var(--text-xs); }
+
+@media (max-width: 520px) {
+  .fut-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-5) var(--space-3); }
+}
+@media (prefers-reduced-motion: reduce) { .fut-card:hover { transform: none; } }
+
+/* ============================================================
+   Herb w terminarzu i sekcja Statystyki
+   ============================================================ */
+.rival-logo--crest { border-radius: 0; object-fit: contain; }
+
+.leaders { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
+.leader {
+  background: var(--ink); color: var(--on-dark); border-radius: var(--radius-lg);
+  border-top: 4px solid var(--gold); padding: var(--space-5);
+}
+.leader p { margin: 0; }
+.leader-title { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .12em; color: var(--on-dark-muted); }
+.leader-value { font-family: var(--font-display); font-size: var(--text-4xl); font-weight: 800; line-height: 1; color: var(--gold-light); margin: var(--space-2) 0 !important; }
+.leader-name { font-weight: 600; }
+
+.stats-wrap { overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--color-border); background: var(--color-surface); }
+.stats-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.stats-table th, .stats-table td { padding: var(--space-3) var(--space-4); text-align: center; border-bottom: 1px solid var(--color-border); }
+.stats-table tbody tr:last-child > * { border-bottom: 0; }
+.stats-table thead th {
+  font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted);
+  font-weight: 600; background: var(--color-surface-2);
+}
+.stats-table thead th:nth-child(2), .stats-table tbody th { text-align: left; }
+.stats-table thead button {
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
+  background: none; border: 0; padding: var(--space-2); min-height: 44px; cursor: pointer;
+}
+.stats-table thead th[aria-sort="descending"] button { color: var(--color-link); }
+.stats-table thead th[aria-sort="descending"] button::after { content: " ▼"; font-size: .8em; }
+.stats-table tbody th { font-weight: 600; }
+.stats-table td { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; }
+.stats-table td.num, .stats-table td.pos { font-family: var(--font-sans); font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); }
+.stats-table td.is-sorted { color: var(--color-link); }
+.stats-player { display: inline-flex; align-items: center; gap: var(--space-3); }
+.stats-player img {
+  width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top;
+  background: linear-gradient(160deg, var(--fut-gold-1), var(--fut-gold-3));
+}
+.stats-table tbody tr:hover { background: var(--color-surface-2); }
+
+@media (max-width: 600px) {
+  .leaders { grid-template-columns: 1fr; }
+  .stats-table th, .stats-table td { padding: var(--space-2); }
+  .stats-table .pos { display: none; }
+}

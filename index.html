@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Łomianki United – amatorski klub piłkarski</title>
+  <meta name="description" content="Łomianki United – amatorski klub piłkarski z Łomianek. Terminarz, wyniki, kadra, statystyki i kontakt.">
+  <meta name="theme-color" content="#141414">
+  <link rel="icon" href="assets/img/herb.png" type="image/png">
+
+  <meta property="og:title" content="Łomianki United – amatorski klub piłkarski">
+  <meta property="og:description" content="Łomianki United – amatorski klub piłkarski z Łomianek. Terminarz, wyniki, kadra, statystyki i kontakt.">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/cards.css">
+
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/layout.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Przejdź do treści</a>
+  <header class="site-header" id="site-header"></header>
+
+  <main id="main">
+    <!-- HERO: najbliższy mecz -->
+    <section class="hero hero--home" aria-labelledby="hero-title">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <img class="hero-crest" src="assets/img/herb.png" alt="Herb Łomianki United" width="120" height="126">
+          <p class="eyebrow" id="hero-eyebrow">Klub piłkarski · Łomianki</p>
+          <h1 id="hero-title">Łomianki <span>United</span></h1>
+          <p class="hero-lead" data-bind="tagline"></p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="terminarz.html">Terminarz i wyniki</a>
+          </div>
+          <dl class="record" id="record" aria-label="Bilans meczów"></dl>
+        </div>
+
+        <article class="match-card" id="next-match" aria-live="polite">
+          <!-- wypełniane przez main.js -->
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <noscript>
+    <p class="noscript">Włącz JavaScript, aby zobaczyć treść strony.</p>
+  </noscript>
+</body>
+</html>
