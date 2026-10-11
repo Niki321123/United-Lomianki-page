@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel admina – Łomianki United</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#141414">
+  <link rel="icon" href="assets/img/herb.png" type="image/png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/layout.js" defer></script>
+  <script src="assets/js/admin.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Przejdź do treści</a>
+  <header class="site-header" id="site-header"></header>
+
+  <main id="main">
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <h1 class="page-title">Panel admina</h1>
+          <p class="section-sub">Wyniki, terminarz, bilans i statystyki</p>
+        </div>
+
+        <!-- Logowanie -->
+        <form class="admin-login" id="login-form">
+          <label for="password">Hasło administratora</label>
+          <div class="admin-login-row">
+            <input type="password" id="password" autocomplete="current-password" required>
+            <button class="btn btn-primary" type="submit">Zaloguj</button>
+          </div>
+          <p class="admin-msg" id="login-msg" role="status"></p>
+        </form>
+
+        <!-- Edytor -->
+        <div id="editor" hidden>
+          <div class="tabs admin-tabs" role="tablist" aria-label="Sekcje panelu">
+            <button role="tab" id="tab-matches" aria-controls="panel-matches" aria-selected="true">Mecze</button>
+            <button role="tab" id="tab-stats" aria-controls="panel-stats" aria-selected="false" tabindex="-1">Statystyki</button>
+            <button role="tab" id="tab-record" aria-controls="panel-record" aria-selected="false" tabindex="-1">Bilans</button>
+          </div>
+
+          <div role="tabpanel" id="panel-matches" aria-labelledby="tab-matches">
+            <button class="btn btn-primary admin-add" type="button" id="add-match">+ Dodaj mecz</button>
+            <p class="admin-hint">Mecz bez wyniku pojawi się w „Nadchodzących”. Po wpisaniu wyniku przejdzie do „Wyników”.</p>
+            <ol class="admin-matches" id="matches"></ol>
+          </div>
+
+          <div role="tabpanel" id="panel-stats" aria-labelledby="tab-stats" hidden>
+            <div class="stats-wrap">
+              <table class="stats-table admin-stats">
+                <thead><tr><th>#</th><th>Zawodnik</th><th>Gole</th><th>Asysty</th><th>MVP</th></tr></thead>
+                <tbody id="stats-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div role="tabpanel" id="panel-record" aria-labelledby="tab-record" hidden>
+            <div class="admin-record">
+              <label>Wygrane <input type="number" min="0" max="9999" id="rec-w"></label>
+              <label>Remisy <input type="number" min="0" max="9999" id="rec-d"></label>
+              <label>Porażki <input type="number" min="0" max="9999" id="rec-l"></label>
+            </div>
+            <button class="btn admin-secondary" type="button" id="rec-calc">Przelicz z terminarza</button>
+            <p class="admin-hint">„Przelicz” liczy tylko mecze wpisane w terminarzu (karne rozstrzygają remis).</p>
+          </div>
+
+          <div class="admin-savebar">
+            <p class="admin-msg" id="save-msg" role="status"></p>
+            <button class="btn btn-primary" type="button" id="save">Zapisz zmiany</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <datalist id="opponents"></datalist>
+  <datalist id="competitions">
+    <option value="Sparing"></option>
+    <option value="Liga WLO"></option>
+    <option value="Towarzyski"></option>
+  </datalist>
+</body>
+</html>

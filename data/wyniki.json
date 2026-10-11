@@ -1,0 +1,360 @@
+{
+  "record": {
+    "w": 17,
+    "d": 2,
+    "l": 7
+  },
+  "fixtures": [
+    {
+      "date": "2025-04-13",
+      "opponent": "DKS Żubr",
+      "logo": "assets/img/rywale/dks-zubr.png",
+      "score": [
+        19,
+        13
+      ]
+    },
+    {
+      "date": "2025-04-26T13:00",
+      "opponent": "FC Pizdeczki",
+      "logo": "assets/img/rywale/fc-pizdeczki.png",
+      "score": [
+        9,
+        6
+      ],
+      "home": false,
+      "venue": "Dziekanów Bajkowy",
+      "competition": "Sparing"
+    },
+    {
+      "date": "2025-05-10",
+      "opponent": "KS Kacownia Łomianki",
+      "logo": "assets/img/rywale/kacownia-lomianki.png",
+      "score": [
+        13,
+        7
+      ]
+    },
+    {
+      "date": "2025-05-17T15:00",
+      "opponent": "Deportivo Bielany",
+      "logo": "assets/img/rywale/deportivo-bielany.png",
+      "score": [
+        12,
+        8
+      ],
+      "home": false,
+      "venue": "ul. Nocznickiego 7",
+      "competition": "Sparing"
+    },
+    {
+      "date": "2025-05-24",
+      "opponent": "FC Samba",
+      "logo": "assets/img/rywale/fc-samba.png",
+      "score": [
+        6,
+        9
+      ]
+    },
+    {
+      "date": "2025-06-22T19:00",
+      "opponent": "Jamajka FC",
+      "logo": "assets/img/rywale/jamajka-fc.png",
+      "score": [
+        13,
+        13
+      ],
+      "home": false,
+      "venue": "ul. Lindego 20",
+      "competition": "Sparing"
+    },
+    {
+      "date": "2025-06-27",
+      "opponent": "Auroria Warszawa",
+      "logo": "assets/img/rywale/auroria-warszawa.png",
+      "score": [
+        9,
+        19
+      ]
+    },
+    {
+      "date": "2025-07-26",
+      "opponent": "FC Pizdeczki",
+      "logo": "assets/img/rywale/fc-pizdeczki.png",
+      "score": [
+        13,
+        12
+      ]
+    },
+    {
+      "date": "2025-09-06T13:00",
+      "opponent": "FC Pizdeczki",
+      "logo": "assets/img/rywale/fc-pizdeczki.png",
+      "score": [
+        27,
+        10
+      ],
+      "home": true,
+      "venue": "Łomianki – boisko szkolne"
+    },
+    {
+      "date": "2025-09-13T16:00",
+      "opponent": "RB Huwdu",
+      "logo": "assets/img/rywale/rb-huwdu.png",
+      "score": [
+        9,
+        9
+      ],
+      "pens": [
+        4,
+        2
+      ],
+      "home": false,
+      "venue": "ul. Conrada 6",
+      "competition": "Sparing"
+    },
+    {
+      "date": "2025-10-12T14:00",
+      "opponent": "KKS Malinki",
+      "logo": "assets/img/rywale/kks-malinki.png",
+      "score": [
+        16,
+        6
+      ],
+      "home": true,
+      "venue": "Łomianki – boisko szkolne",
+      "competition": "Sparing"
+    },
+    {
+      "date": "2025-10-25",
+      "opponent": "Deportivo Bielany",
+      "logo": "assets/img/rywale/deportivo-bielany.png",
+      "score": [
+        21,
+        14
+      ]
+    },
+    {
+      "date": "2025-11-11T13:00",
+      "opponent": "Centuria Mokotów",
+      "logo": "assets/img/rywale/centuria-mokotow.png",
+      "score": [
+        24,
+        8
+      ],
+      "home": false,
+      "venue": "ul. Filarecka 2",
+      "competition": "Sparing"
+    },
+    {
+      "date": "2025-11-30",
+      "opponent": "Sparta Żoliborz",
+      "logo": "assets/img/rywale/sparta-zoliborz.png",
+      "score": [
+        21,
+        10
+      ]
+    },
+    {
+      "date": "2025-12-14",
+      "opponent": "Dynamo Żoliborz",
+      "logo": "assets/img/rywale/dynamo-zoliborz.png",
+      "score": [
+        13,
+        13
+      ],
+      "pens": [
+        5,
+        4
+      ]
+    },
+    {
+      "date": "2025-12-22",
+      "opponent": "FC Bigjoint",
+      "logo": "assets/img/rywale/fc-bigjoint.png",
+      "score": [
+        13,
+        9
+      ]
+    },
+    {
+      "date": "2025-12-25",
+      "opponent": "Sparta Żoliborz",
+      "logo": "assets/img/rywale/sparta-zoliborz.png",
+      "score": [
+        21,
+        10
+      ]
+    },
+    {
+      "date": "2026-01-02",
+      "opponent": "FC Charakterni",
+      "logo": "assets/img/rywale/fc-charakterni.png",
+      "score": [
+        12,
+        10
+      ]
+    },
+    {
+      "date": "2026-01-26T14:00",
+      "opponent": "DKS Drewno",
+      "logo": "assets/img/rywale/dks-drewno.png",
+      "score": [
+        20,
+        14
+      ],
+      "home": false,
+      "venue": "ul. Strumykowa 21",
+      "competition": "Sparing"
+    },
+    {
+      "date": "2026-03-08T13:00",
+      "opponent": "Kajak FC",
+      "logo": "assets/img/rywale/kajak-fc.png",
+      "score": [
+        15,
+        9
+      ],
+      "home": true,
+      "venue": "Łomianki – boisko szkolne",
+      "competition": "Liga WLO"
+    },
+    {
+      "date": "2026-03-16",
+      "opponent": "Baryga FC",
+      "logo": "assets/img/rywale/baryga-fc.png",
+      "score": [
+        4,
+        8
+      ],
+      "competition": "Liga WLO"
+    },
+    {
+      "date": "2026-04-19",
+      "opponent": "KKS Malinki",
+      "logo": "assets/img/rywale/kks-malinki.png",
+      "score": [
+        9,
+        8
+      ],
+      "competition": "Towarzyski"
+    },
+    {
+      "date": "2026-05-31",
+      "opponent": "FC Chomicz",
+      "logo": "assets/img/rywale/fc-chomicz.png",
+      "score": [
+        16,
+        18
+      ]
+    },
+    {
+      "date": "2026-09-01T14:00",
+      "opponent": "Sicarios Bielsko-Biała",
+      "logo": "assets/img/rywale/sicarios.png",
+      "score": [
+        4,
+        2
+      ],
+      "venue": "ul. Wiślana",
+      "competition": "Sparing"
+    }
+  ],
+  "playerStats": {
+    "1": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "3": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "4": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "5": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "6": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "7": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "8": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "9": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "10": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "11": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "13": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "14": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "17": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "18": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "21": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "25": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "66": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "67": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    },
+    "99": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 0
+    }
+  }
+}
