@@ -3,6 +3,7 @@
    Funkcja Vercel: POST /api/save
    Zmienne środowiskowe (Vercel → Settings → Environment Variables):
      ADMIN_PASSWORD  – hasło do panelu
+     ADMIN_PASSWORD_2, ADMIN_PASSWORD_3… – opcjonalnie kolejne hasła (np. dla drugiego admina)
      GITHUB_TOKEN    – token GitHub z uprawnieniem "Contents: Read and write" do repo
      GITHUB_REPO     – opcjonalnie, domyślnie Niki321123/United-Lomianki-page
      GITHUB_BRANCH   – opcjonalnie, domyślnie main
@@ -72,13 +73,25 @@ function cleanLogo(logo) {
   return { path: `${LOGO_DIR}${logo.slug}.${logo.ext}`, base64: buf.toString("base64") };
 }
 
-/* ---------- Hasło (porównanie odporne na pomiar czasu) ---------- */
-function passwordOk(given) {
-  const expected = process.env.ADMIN_PASSWORD || "";
-  if (!expected || typeof given !== "string") return false;
+/* ---------- Hasła (porównanie odporne na pomiar czasu) ---------- */
+// Każda zmienna ADMIN_PASSWORD, ADMIN_PASSWORD_2, ADMIN_PASSWORD_3… to osobne hasło.
+function adminPasswords() {
+  return Object.keys(process.env)
+    .filter((k) => /^ADMIN_PASSWORD(_\d+)?$/.test(k) && process.env[k])
+    .sort()
+    .map((k) => ({ label: k === "ADMIN_PASSWORD" ? "hasło 1" : `hasło ${k.split("_").pop()}`, value: process.env[k] }));
+}
+
+// Zwraca etykietę pasującego hasła albo null
+function matchPassword(given) {
+  if (typeof given !== "string" || !given) return null;
   const a = crypto.createHash("sha256").update(given).digest();
-  const b = crypto.createHash("sha256").update(expected).digest();
-  return crypto.timingSafeEqual(a, b);
+  let found = null;
+  for (const p of adminPasswords()) {          // sprawdzamy wszystkie, bez przerywania
+    const b = crypto.createHash("sha256").update(p.value).digest();
+    if (crypto.timingSafeEqual(a, b) && !found) found = p.label;
+  }
+  return found;
 }
 
 /* ---------- GitHub: zapis pliku jednym commitem ---------- */
@@ -105,10 +118,11 @@ module.exports = async function handler(req, res) {
   if (req.method !== "POST") { res.setHeader("Allow", "POST"); return res.status(405).json({ error: "Tylko POST" }); }
   const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
 
-  if (!process.env.ADMIN_PASSWORD || !process.env.GITHUB_TOKEN) {
+  if (!adminPasswords().length || !process.env.GITHUB_TOKEN) {
     return res.status(500).json({ error: "Panel nie jest skonfigurowany: brak ADMIN_PASSWORD lub GITHUB_TOKEN w Vercelu." });
   }
-  if (!passwordOk(body.password)) {
+  const who = matchPassword(body.password);
+  if (!who) {
     await new Promise((r) => setTimeout(r, 800));   // spowalnia zgadywanie hasła
     return res.status(401).json({ error: "Złe hasło" });
   }
@@ -117,9 +131,9 @@ module.exports = async function handler(req, res) {
   try {
     const data = cleanData(body.data);
     const logo = cleanLogo(body.logo);
-    if (logo) await putFile(logo.path, logo.base64, `Panel admina: logo ${logo.path.split("/").pop()}`);
+    if (logo) await putFile(logo.path, logo.base64, `Panel admina (${who}): logo ${logo.path.split("/").pop()}`);
     const json = JSON.stringify(data, null, 2) + "\n";
-    const commit = await putFile(DATA_PATH, Buffer.from(json, "utf8").toString("base64"), "Panel admina: aktualizacja wyników i statystyk");
+    const commit = await putFile(DATA_PATH, Buffer.from(json, "utf8").toString("base64"), `Panel admina (${who}): aktualizacja wyników i statystyk`);
     return res.status(200).json({ ok: true, commit, logo: logo ? logo.path : null });
   } catch (e) {
     return res.status(400).json({ error: e.message });
