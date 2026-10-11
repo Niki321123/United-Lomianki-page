@@ -262,6 +262,12 @@
     const btn = $("#save"); btn.disabled = true;
     setMsg("#save-msg", "Zapisuję…");
     try {
+      // nazwa pliku logo z aktualnej nazwy rywala (mogła się zmienić po wgraniu)
+      if (pendingLogo) {
+        const f = data.fixtures[pendingLogo.index];
+        pendingLogo.slug = slugify(f.opponent);
+        f.logo = `assets/img/rywale/${pendingLogo.slug}.png`;
+      }
       const logo = pendingLogo ? { slug: pendingLogo.slug, ext: "png", base64: pendingLogo.base64 } : null;
       await api({ data, logo });
       pendingLogo = null; dirty = false;
