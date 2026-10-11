@@ -1,31 +1,3 @@
 {
-  "news": [
-    {
-      "date": "2026-10-11",
-      "title": "Ruszyła oficjalna strona klubu",
-      "excerpt": "Terminarz, wyniki, kadra i statystyki – od dziś wszystko o Łomianki United w jednym miejscu.",
-      "body": [
-        "Od dziś Łomianki United ma własną stronę internetową. Znajdziesz tu terminarz i wyniki meczów, kadrę zespołu oraz informacje o tym, gdzie i kiedy gramy.",
-        "Na bieżąco relacje, zdjęcia i kulisy publikujemy też na Instagramie – zaobserwuj @lomianki_united."
-      ]
-    },
-    {
-      "date": "2026-10-05",
-      "title": "Bilans 17-2-7 i apetyt na więcej",
-      "excerpt": "Siedemnaście zwycięstw, dwa remisy, siedem porażek. Podsumowujemy dotychczasową drogę drużyny.",
-      "body": [
-        "Od założenia klubu w 2025 roku rozegraliśmy 26 spotkań: 17 wygranych, 2 remisy i 7 porażek.",
-        "Dziękujemy wszystkim, którzy przychodzą na mecze i wspierają nas w sieci. Kolejne spotkania już w terminarzu."
-      ]
-    },
-    {
-      "date": "2026-09-20",
-      "title": "Pimar okna bramy z nami",
-      "excerpt": "Firma Pimar okna bramy jest sponsorem Łomianki United. Dziękujemy za wsparcie lokalnej piłki!",
-      "body": [
-        "Firma Pimar okna bramy wspiera Łomianki United jako sponsor klubu.",
-        "Dzięki partnerom możemy grać, rozwijać drużynę i reprezentować Łomianki. Jeśli też chcesz dołączyć do grona sponsorów – napisz do nas."
-      ]
-    }
-  ]
+  "news": []
 }
