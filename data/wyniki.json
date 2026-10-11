@@ -282,8 +282,8 @@
       "mvp": 0
     },
     "3": {
-      "goals": 0,
-      "assists": 0,
+      "goals": 3,
+      "assists": 1,
       "mvp": 0
     },
     "4": {
@@ -332,13 +332,13 @@
       "mvp": 0
     },
     "14": {
-      "goals": 0,
-      "assists": 0,
+      "goals": 1,
+      "assists": 3,
       "mvp": 0
     },
     "17": {
-      "goals": 0,
-      "assists": 0,
+      "goals": 1,
+      "assists": 1,
       "mvp": 0
     },
     "18": {
@@ -367,7 +367,7 @@
       "mvp": 0
     },
     "99": {
-      "goals": 0,
+      "goals": 3,
       "assists": 0,
       "mvp": 0
     }
