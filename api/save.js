@@ -8,18 +8,18 @@
      GITHUB_TOKEN    – token GitHub z uprawnieniem "Contents: Read and write" do repo
      GITHUB_REPO     – opcjonalnie, domyślnie Niki321123/United-Lomianki-page
      GITHUB_BRANCH   – opcjonalnie, domyślnie main
-   Zapis = commit pliku data/wyniki.json albo data/sklep.json (i ewentualnie obrazka) do repo,
+   Zapis = commit pliku data/wyniki.json albo data/aktualnosci.json (i obrazków) do repo,
    po którym Vercel sam przebudowuje stronę.
    ============================================================ */
 const crypto = require("crypto");
 
 const REPO = process.env.GITHUB_REPO || "Niki321123/United-Lomianki-page";
 const BRANCH = process.env.GITHUB_BRANCH || "main";
-const TARGETS = { wyniki: "data/wyniki.json", sklep: "data/sklep.json", aktualnosci: "data/aktualnosci.json" };
-const IMAGE_DIRS = { rywale: "assets/img/rywale/", sklep: "assets/img/sklep/", news: "assets/img/news/" };
+const TARGETS = { wyniki: "data/wyniki.json", aktualnosci: "data/aktualnosci.json" };
+const IMAGE_DIRS = { rywale: "assets/img/rywale/", news: "assets/img/news/" };
 // Kto może zapisywać który plik i do którego folderu wgrywać obrazki
 const ROLES = {
-  admin: { targets: ["wyniki", "sklep", "aktualnosci"], dirs: ["rywale", "sklep", "news"] },
+  admin: { targets: ["wyniki", "aktualnosci"], dirs: ["rywale", "news"] },
   news:  { targets: ["aktualnosci"], dirs: ["news"] }
 };
 const MAX_IMAGE_BYTES = 1200 * 1024;
@@ -68,36 +68,6 @@ function cleanData(d) {
   };
 }
 
-/* ---------- Sklep ---------- */
-const PRODUCT_IMG_RE = /^assets\/img\/sklep\/[a-z0-9-]{1,60}\.(png|jpg|webp)$/;
-
-function cleanShop(d) {
-  if (!d || typeof d !== "object") throw new Error("Brak danych sklepu");
-  if (!Array.isArray(d.shipping) || d.shipping.length > 5) throw new Error("Zła lista dostaw");
-  if (!Array.isArray(d.products) || d.products.length > 100) throw new Error("Zła lista produktów");
-  const shipping = d.shipping.map((s, i) => {
-    if (!s || !isStr(s.name, 60) || !s.name.trim() || !isInt(s.price, 0, 100000)) throw new Error(`Dostawa ${i + 1}: zła nazwa lub cena`);
-    return { name: s.name.trim(), price: s.price };
-  });
-  const ids = new Set();
-  const products = d.products.map((p, i) => {
-    const err = (m) => { throw new Error(`Produkt ${i + 1}: ${m}`); };
-    if (!p || typeof p !== "object") err("niepoprawne dane");
-    if (!isStr(p.id, 60) || !/^[a-z0-9-]+$/.test(p.id) || ids.has(p.id)) err("zły lub powtórzony identyfikator");
-    ids.add(p.id);
-    if (!isStr(p.name, 80) || !p.name.trim()) err("brak nazwy");
-    if (p.price !== null && !isInt(p.price, 0, 1000000)) err("zła cena");
-    if (p.description && !isStr(p.description, 500)) err("za długi opis");
-    if (!Array.isArray(p.sizes) || p.sizes.length > 12 || !p.sizes.every((x) => isStr(x, 10) && x.trim())) err("złe rozmiary");
-    if (p.image && (!isStr(p.image, 120) || !PRODUCT_IMG_RE.test(p.image))) err("zła ścieżka zdjęcia");
-    if (typeof p.active !== "boolean") err("zły status");
-    if (p.active && !(Number.isInteger(p.price) && p.price > 0)) err("aktywny produkt musi mieć cenę");
-    return { id: p.id, name: p.name.trim(), price: p.price, description: (p.description || "").trim(),
-      sizes: p.sizes.map((x) => x.trim()), image: p.image || "", active: p.active };
-  });
-  return { shipping, products };
-}
-
 /* ---------- Aktualności ---------- */
 const NEWS_IMG_RE = /^assets\/img\/news\/[a-z0-9-]{1,80}\.(png|jpg|webp)$/;
 
@@ -122,7 +92,7 @@ function cleanNews(d) {
   return { news: news.sort((a, b) => b.date.localeCompare(a.date)) };
 }
 
-/* ---------- Obrazek (logo rywala, zdjęcie produktu albo aktualności) ---------- */
+/* ---------- Obrazek (logo rywala albo zdjęcie do aktualności) ---------- */
 function cleanImage(img) {
   if (!img) return null;
   const dir = IMAGE_DIRS[img.dir || "rywale"];
@@ -246,12 +216,12 @@ module.exports = async function handler(req, res) {
     if (!TARGETS[target]) throw new Error("Nieznany plik do zapisu");
     const img = body.image || body.logo;
     if (!allowed.targets.includes(target) || (img && !allowed.dirs.includes(img.dir || "rywale"))) return deny();
-    const data = target === "sklep" ? cleanShop(body.data) : target === "aktualnosci" ? cleanNews(body.data) : cleanData(body.data);
+    const data = target === "aktualnosci" ? cleanNews(body.data) : cleanData(body.data);
     const entries = cleanBlobs(body.blobs, allowed.dirs);
     const image = cleanImage(img);
     if (image) entries.push({ path: image.path, sha: await createBlob(image.base64) });
     entries.push({ path: TARGETS[target], content: JSON.stringify(data, null, 2) + "\n" });
-    const what = { sklep: "sklep", aktualnosci: "aktualności", wyniki: "wyniki i statystyki" }[target];
+    const what = { aktualnosci: "aktualności", wyniki: "wyniki i statystyki" }[target];
     const files = entries.length - 1;
     const commit = await commitFiles(entries, `Panel admina (${who.label}): ${what}${files ? ` (+${files} ${files === 1 ? "obrazek" : "obrazków"})` : ""}`);
     return res.status(200).json({ ok: true, commit, image: image ? image.path : null });
@@ -261,6 +231,5 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.cleanData = cleanData;
-module.exports.cleanShop = cleanShop;
 module.exports.cleanNews = cleanNews;
 module.exports.cleanImage = cleanImage;

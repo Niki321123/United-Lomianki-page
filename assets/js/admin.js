@@ -73,7 +73,6 @@
     $("#opponents").innerHTML = [...new Set(data.fixtures.map((f) => f.opponent))]
       .map((o) => `<option value="${esc(o)}"></option>`).join("");
     renderMatches(); renderStats(); renderRecord();
-    if (window.AdminShop) await window.AdminShop.load();
   }
 
   /* ---------- Zakładki (widoczne zależnie od roli) ---------- */
@@ -87,8 +86,7 @@
   }
   function applyRole() {
     const visible = allTabs().filter((t) => {
-      const flagOff = t.dataset.flag && !(window.CLUB && window.CLUB[t.dataset.flag]);   // np. sklep wyłączony w data.js
-      const ok = t.dataset.roles.split(" ").includes(role) && !flagOff;
+      const ok = t.dataset.roles.split(" ").includes(role);
       t.hidden = !ok;
       return ok;
     });
@@ -288,11 +286,9 @@
     pendingLogo = null; dirty = false;
   }
 
-  const shop = () => window.AdminShop;
   $("#save").addEventListener("click", async () => {
     const jobs = [];
     if (dirty) jobs.push(saveResults);
-    if (shop() && shop().isDirty()) jobs.push(shop().save);
     if (window.AdminNews && window.AdminNews.isDirty()) jobs.push(window.AdminNews.save);
     if (!jobs.length) return setMsg("#save-msg", "Brak zmian do zapisania.");
     const btn = $("#save"); btn.disabled = true;
@@ -306,11 +302,11 @@
   });
 
   window.addEventListener("beforeunload", (e) => {
-    if (dirty || (shop() && shop().isDirty()) || (window.AdminNews && window.AdminNews.isDirty())) {
+    if (dirty || (window.AdminNews && window.AdminNews.isDirty())) {
       e.preventDefault(); e.returnValue = "";
     }
   });
 
-  // Wspólne narzędzia dla edytora sklepu (admin-shop.js)
+  // Wspólne narzędzia dla edytora aktualności (admin-news.js)
   window.Admin = { api, esc, slugify, setMsg, $ };
 })();

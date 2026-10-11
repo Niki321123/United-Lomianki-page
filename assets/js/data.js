@@ -14,7 +14,6 @@ window.CLUB = {
   tagline: "",                                     // opcjonalny tekst pod nazwą klubu (pusty = ukryty)
   league: "",                                      // [UZUPEŁNIJ] np. "Liga Łomianki – sezon 2026/27"
   season: "Sezon 2026/27",
-  shop: false,                                     // true = pokaż Sklep w menu i w panelu admina
 
 
   contact: {

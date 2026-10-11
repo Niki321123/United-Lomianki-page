@@ -17,7 +17,6 @@
   <script src="assets/js/data.js" defer></script>
   <script src="assets/js/layout.js" defer></script>
   <script src="assets/js/admin.js" defer></script>
-  <script src="assets/js/admin-shop.js" defer></script>
   <script src="assets/js/admin-news.js" defer></script>
 </head>
 <body id="top">
@@ -29,7 +28,7 @@
       <div class="container">
         <div class="section-head">
           <h1 class="page-title">Panel admina</h1>
-          <p class="section-sub">Wyniki, terminarz, bilans, statystyki, aktualności i sklep</p>
+          <p class="section-sub">Wyniki, terminarz, bilans, statystyki i aktualności</p>
         </div>
 
         <!-- Logowanie -->
@@ -50,7 +49,6 @@
             <button role="tab" id="tab-stats" data-roles="admin" aria-controls="panel-stats" aria-selected="false" tabindex="-1">Statystyki</button>
             <button role="tab" id="tab-record" data-roles="admin" aria-controls="panel-record" aria-selected="false" tabindex="-1">Bilans</button>
             <button role="tab" id="tab-news" data-roles="admin news" aria-controls="panel-news" aria-selected="false" tabindex="-1">Aktualności</button>
-            <button role="tab" id="tab-shop" data-roles="admin" data-flag="shop" aria-controls="panel-shop" aria-selected="false" tabindex="-1">Sklep</button>
           </div>
 
           <div role="tabpanel" id="panel-matches" aria-labelledby="tab-matches">
@@ -82,18 +80,6 @@
             <button class="btn btn-primary admin-add" type="button" id="add-news">+ Dodaj wpis</button>
             <p class="admin-hint">Najnowsze wpisy są na górze. Okładka to zdjęcie na kafelku wpisu (kadrowane do 16:9). W galerii możesz dodać dowolną liczbę zdjęć – zaznacz kilka naraz.</p>
             <ol class="admin-matches" id="news-admin"></ol>
-          </div>
-
-          <div role="tabpanel" id="panel-shop" aria-labelledby="tab-shop" hidden>
-            <h2 class="admin-h2">Produkty</h2>
-            <button class="btn btn-primary admin-add" type="button" id="add-product">+ Dodaj produkt</button>
-            <p class="admin-hint">Status „Wkrótce” pokazuje produkt bez możliwości zakupu. „W sprzedaży” wymaga ceny. Kliknij zdjęcie, żeby je zmienić.</p>
-            <ol class="admin-matches" id="products-admin"></ol>
-
-            <h2 class="admin-h2">Dostawa</h2>
-            <p class="admin-hint">Klient wybiera sposób dostawy na stronie płatności Stripe.</p>
-            <ul class="admin-ships" id="shipping-admin"></ul>
-            <button class="btn admin-secondary" type="button" id="add-shipping">+ Dodaj sposób dostawy</button>
           </div>
 
           <div class="admin-savebar">

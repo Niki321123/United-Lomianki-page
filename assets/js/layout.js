@@ -10,9 +10,8 @@
     { href: "terminarz.html", label: "Terminarz" },
     { href: "kadra.html", label: "Kadra" },
     { href: "statystyki.html", label: "Statystyki" },
-    { href: "sponsorzy.html", label: "Sponsorzy" },
-    { href: "sklep.html", label: "Sklep", hidden: !(window.CLUB && window.CLUB.shop) }
-  ].filter((p) => !p.hidden);
+    { href: "sponsorzy.html", label: "Sponsorzy" }
+  ];
   const current = location.pathname.split("/").pop() || "index.html";
 
   // Ikony social media – używane też w main.js (window.ICONS)
