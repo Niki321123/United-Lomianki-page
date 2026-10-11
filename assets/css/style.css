@@ -465,3 +465,33 @@ main > .section:first-child { padding-top: var(--space-10); }
 @media (max-width: 860px) {
   .site-nav a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--gold); padding-left: var(--space-4); }
 }
+
+/* ---------- Galeria aktualności ---------- */
+.news-count {
+  position: absolute; right: var(--space-3); bottom: var(--space-3); padding: 2px var(--space-2);
+  border-radius: var(--radius-full); background: rgba(0,0,0,.7); color: #fff; font-size: var(--text-xs); font-weight: 600;
+}
+.news-dialog-cover { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius-md); margin-bottom: var(--space-5); }
+.news-gallery-title { font-size: var(--text-lg); margin-top: var(--space-6); }
+.news-gallery { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-2); }
+.news-gallery button { display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: var(--radius-sm); overflow: hidden; cursor: zoom-in; background: var(--ink); }
+.news-gallery img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-base) var(--ease-out); }
+.news-gallery button:hover img { transform: scale(1.04); }
+
+.photo-viewer {
+  width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: rgba(8,8,8,.96);
+}
+.photo-viewer[open] { display: grid; place-items: center; }
+.photo-viewer::backdrop { background: rgba(0,0,0,.8); }
+.photo-viewer img { max-width: calc(100vw - 2rem); max-height: calc(100vh - 6rem); object-fit: contain; border-radius: var(--radius-sm); }
+.photo-viewer form { position: absolute; }
+.photo-viewer .dialog-close { position: fixed; top: var(--space-4); right: var(--space-4); z-index: 2; }
+.photo-nav {
+  position: fixed; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; border-radius: 50%; border: 0;
+  background: rgba(255,255,255,.12); color: #fff; font-size: 34px; line-height: 1; cursor: pointer;
+}
+.photo-nav:hover { background: var(--gold); color: var(--ink); }
+.photo-prev { left: var(--space-4); }
+.photo-next { right: var(--space-4); }
+.photo-count { position: fixed; bottom: var(--space-4); left: 0; right: 0; margin: 0 auto; text-align: center; color: #ddd; font-weight: 600; }

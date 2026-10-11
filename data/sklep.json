@@ -1,0 +1,35 @@
+{
+  "shipping": [
+    { "name": "Odbiór osobisty na meczu", "price": 0 },
+    { "name": "Paczkomat / kurier", "price": 1500 }
+  ],
+  "products": [
+    {
+      "id": "koszulka-klubowa",
+      "name": "Koszulka klubowa",
+      "price": null,
+      "description": "Czarna koszulka z herbem Łomianki United.",
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "image": "",
+      "active": false
+    },
+    {
+      "id": "bluza-z-kapturem",
+      "name": "Bluza z kapturem",
+      "price": null,
+      "description": "Czarna bluza z herbem na piersi i złotym napisem UNITED na plecach.",
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "image": "",
+      "active": false
+    },
+    {
+      "id": "szalik",
+      "name": "Szalik kibica",
+      "price": null,
+      "description": "Szalik w barwach klubu – czerń i złoto.",
+      "sizes": [],
+      "image": "",
+      "active": false
+    }
+  ]
+}

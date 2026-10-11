@@ -3,20 +3,26 @@
    Funkcja Vercel: POST /api/save
    Zmienne środowiskowe (Vercel → Settings → Environment Variables):
      ADMIN_PASSWORD  – hasło do panelu
-     ADMIN_PASSWORD_2, ADMIN_PASSWORD_3… – opcjonalnie kolejne hasła (np. dla drugiego admina)
+     ADMIN_PASSWORD_2, ADMIN_PASSWORD_3… – opcjonalnie kolejne hasła pełnego admina
+     NEWS_PASSWORD, NEWS_PASSWORD_2…      – hasła admina, który edytuje tylko aktualności
      GITHUB_TOKEN    – token GitHub z uprawnieniem "Contents: Read and write" do repo
      GITHUB_REPO     – opcjonalnie, domyślnie Niki321123/United-Lomianki-page
      GITHUB_BRANCH   – opcjonalnie, domyślnie main
-   Zapis = commit pliku data/wyniki.json (i ewentualnie logo rywala) do repo,
+   Zapis = commit pliku data/wyniki.json albo data/sklep.json (i ewentualnie obrazka) do repo,
    po którym Vercel sam przebudowuje stronę.
    ============================================================ */
 const crypto = require("crypto");
 
 const REPO = process.env.GITHUB_REPO || "Niki321123/United-Lomianki-page";
 const BRANCH = process.env.GITHUB_BRANCH || "main";
-const DATA_PATH = "data/wyniki.json";
-const LOGO_DIR = "assets/img/rywale/";
-const MAX_LOGO_BYTES = 600 * 1024;
+const TARGETS = { wyniki: "data/wyniki.json", sklep: "data/sklep.json", aktualnosci: "data/aktualnosci.json" };
+const IMAGE_DIRS = { rywale: "assets/img/rywale/", sklep: "assets/img/sklep/", news: "assets/img/news/" };
+// Kto może zapisywać który plik i do którego folderu wgrywać obrazki
+const ROLES = {
+  admin: { targets: ["wyniki", "sklep", "aktualnosci"], dirs: ["rywale", "sklep", "news"] },
+  news:  { targets: ["aktualnosci"], dirs: ["news"] }
+};
+const MAX_IMAGE_BYTES = 1200 * 1024;
 
 /* ---------- Walidacja danych ---------- */
 const isInt = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
@@ -62,56 +68,152 @@ function cleanData(d) {
   };
 }
 
-function cleanLogo(logo) {
-  if (!logo) return null;
-  if (!isStr(logo.slug, 60) || !/^[a-z0-9-]+$/.test(logo.slug)) throw new Error("Zła nazwa pliku logo");
-  if (!["png", "jpg", "webp"].includes(logo.ext)) throw new Error("Logo musi być PNG, JPG albo WEBP");
-  if (!isStr(logo.base64, Math.ceil(MAX_LOGO_BYTES * 4 / 3) + 8)) throw new Error("Logo jest za duże (max 600 KB)");
-  const buf = Buffer.from(logo.base64, "base64");
-  const magic = { png: [0x89, 0x50, 0x4e, 0x47], jpg: [0xff, 0xd8, 0xff], webp: [0x52, 0x49, 0x46, 0x46] }[logo.ext];
-  if (buf.length > MAX_LOGO_BYTES || !magic.every((b, i) => buf[i] === b)) throw new Error("Plik logo jest uszkodzony albo ma zły format");
-  return { path: `${LOGO_DIR}${logo.slug}.${logo.ext}`, base64: buf.toString("base64") };
+/* ---------- Sklep ---------- */
+const PRODUCT_IMG_RE = /^assets\/img\/sklep\/[a-z0-9-]{1,60}\.(png|jpg|webp)$/;
+
+function cleanShop(d) {
+  if (!d || typeof d !== "object") throw new Error("Brak danych sklepu");
+  if (!Array.isArray(d.shipping) || d.shipping.length > 5) throw new Error("Zła lista dostaw");
+  if (!Array.isArray(d.products) || d.products.length > 100) throw new Error("Zła lista produktów");
+  const shipping = d.shipping.map((s, i) => {
+    if (!s || !isStr(s.name, 60) || !s.name.trim() || !isInt(s.price, 0, 100000)) throw new Error(`Dostawa ${i + 1}: zła nazwa lub cena`);
+    return { name: s.name.trim(), price: s.price };
+  });
+  const ids = new Set();
+  const products = d.products.map((p, i) => {
+    const err = (m) => { throw new Error(`Produkt ${i + 1}: ${m}`); };
+    if (!p || typeof p !== "object") err("niepoprawne dane");
+    if (!isStr(p.id, 60) || !/^[a-z0-9-]+$/.test(p.id) || ids.has(p.id)) err("zły lub powtórzony identyfikator");
+    ids.add(p.id);
+    if (!isStr(p.name, 80) || !p.name.trim()) err("brak nazwy");
+    if (p.price !== null && !isInt(p.price, 0, 1000000)) err("zła cena");
+    if (p.description && !isStr(p.description, 500)) err("za długi opis");
+    if (!Array.isArray(p.sizes) || p.sizes.length > 12 || !p.sizes.every((x) => isStr(x, 10) && x.trim())) err("złe rozmiary");
+    if (p.image && (!isStr(p.image, 120) || !PRODUCT_IMG_RE.test(p.image))) err("zła ścieżka zdjęcia");
+    if (typeof p.active !== "boolean") err("zły status");
+    if (p.active && !(Number.isInteger(p.price) && p.price > 0)) err("aktywny produkt musi mieć cenę");
+    return { id: p.id, name: p.name.trim(), price: p.price, description: (p.description || "").trim(),
+      sizes: p.sizes.map((x) => x.trim()), image: p.image || "", active: p.active };
+  });
+  return { shipping, products };
+}
+
+/* ---------- Aktualności ---------- */
+const NEWS_IMG_RE = /^assets\/img\/news\/[a-z0-9-]{1,80}\.(png|jpg|webp)$/;
+
+function cleanNews(d) {
+  if (!d || !Array.isArray(d.news) || d.news.length > 300) throw new Error("Zła lista aktualności");
+  const news = d.news.map((n, i) => {
+    const err = (m) => { throw new Error(`Wpis ${i + 1}: ${m}`); };
+    if (!n || typeof n !== "object") err("niepoprawne dane");
+    if (!isStr(n.date, 10) || !/^\d{4}-\d{2}-\d{2}$/.test(n.date)) err("zła data");
+    if (!isStr(n.title, 120) || !n.title.trim()) err("brak tytułu");
+    if (!isStr(n.excerpt || "", 300)) err("za długi skrót");
+    if (!Array.isArray(n.body) || n.body.length > 30 || !n.body.every((p) => isStr(p, 3000))) err("zła treść");
+    if (n.image && (!isStr(n.image, 120) || !NEWS_IMG_RE.test(n.image))) err("zła ścieżka okładki");
+    const gallery = n.gallery || [];
+    if (!Array.isArray(gallery) || gallery.length > 300 || !gallery.every((g) => isStr(g, 120) && NEWS_IMG_RE.test(g))) err("zła galeria");
+    const out = { date: n.date, title: n.title.trim(), excerpt: (n.excerpt || "").trim(),
+      body: n.body.map((p) => p.trim()).filter(Boolean) };
+    if (n.image) out.image = n.image;
+    if (gallery.length) out.gallery = gallery;
+    return out;
+  });
+  return { news: news.sort((a, b) => b.date.localeCompare(a.date)) };
+}
+
+/* ---------- Obrazek (logo rywala, zdjęcie produktu albo aktualności) ---------- */
+function cleanImage(img) {
+  if (!img) return null;
+  const dir = IMAGE_DIRS[img.dir || "rywale"];
+  if (!dir) throw new Error("Zły folder obrazka");
+  if (!isStr(img.slug, 80) || !/^[a-z0-9-]+$/.test(img.slug)) throw new Error("Zła nazwa pliku obrazka");
+  if (!["png", "jpg", "webp"].includes(img.ext)) throw new Error("Obrazek musi być PNG, JPG albo WEBP");
+  if (!isStr(img.base64, Math.ceil(MAX_IMAGE_BYTES * 4 / 3) + 8)) throw new Error("Obrazek jest za duży (max 1,2 MB)");
+  const buf = Buffer.from(img.base64, "base64");
+  const magic = { png: [0x89, 0x50, 0x4e, 0x47], jpg: [0xff, 0xd8, 0xff], webp: [0x52, 0x49, 0x46, 0x46] }[img.ext];
+  if (buf.length > MAX_IMAGE_BYTES || !magic.every((b, i) => buf[i] === b)) throw new Error("Plik obrazka jest uszkodzony albo ma zły format");
+  return { path: `${dir}${img.slug}.${img.ext}`, base64: buf.toString("base64") };
 }
 
 /* ---------- Hasła (porównanie odporne na pomiar czasu) ---------- */
 // Każda zmienna ADMIN_PASSWORD, ADMIN_PASSWORD_2, ADMIN_PASSWORD_3… to osobne hasło.
+// ADMIN_PASSWORD… = pełny admin, NEWS_PASSWORD… = tylko aktualności
 function adminPasswords() {
   return Object.keys(process.env)
-    .filter((k) => /^ADMIN_PASSWORD(_\d+)?$/.test(k) && process.env[k])
+    .filter((k) => /^(ADMIN|NEWS)_PASSWORD(_\d+)?$/.test(k) && process.env[k])
     .sort()
-    .map((k) => ({ label: k === "ADMIN_PASSWORD" ? "hasło 1" : `hasło ${k.split("_").pop()}`, value: process.env[k] }));
+    .map((k) => {
+      const role = k.startsWith("NEWS") ? "news" : "admin";
+      const n = /_\d+$/.test(k) ? k.split("_").pop() : "1";
+      return { role, label: role === "news" ? `aktualności ${n}` : `hasło ${n}`, value: process.env[k] };
+    });
 }
 
-// Zwraca etykietę pasującego hasła albo null
+// Zwraca { role, label } pasującego hasła albo null
 function matchPassword(given) {
   if (typeof given !== "string" || !given) return null;
   const a = crypto.createHash("sha256").update(given).digest();
   let found = null;
   for (const p of adminPasswords()) {          // sprawdzamy wszystkie, bez przerywania
     const b = crypto.createHash("sha256").update(p.value).digest();
-    if (crypto.timingSafeEqual(a, b) && !found) found = p.label;
+    if (crypto.timingSafeEqual(a, b) && !found) found = { role: p.role, label: p.label };
   }
   return found;
 }
 
-/* ---------- GitHub: zapis pliku jednym commitem ---------- */
-async function putFile(path, base64, message) {
-  const url = `https://api.github.com/repos/${REPO}/contents/${path}`;
-  const headers = {
-    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-    Accept: "application/vnd.github+json",
-    "User-Agent": "lomianki-united-admin"
-  };
-  const cur = await fetch(`${url}?ref=${BRANCH}`, { headers });
-  const sha = cur.ok ? (await cur.json()).sha : undefined;
-  if (!cur.ok && cur.status !== 404) throw new Error(`GitHub: nie można odczytać ${path} (${cur.status})`);
-  const res = await fetch(url, {
-    method: "PUT",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ message, content: base64, branch: BRANCH, ...(sha ? { sha } : {}) })
+/* ---------- GitHub (Git Data API): wiele plików w jednym commicie ---------- */
+async function gh(method, path, body) {
+  const res = await fetch(`https://api.github.com/repos/${REPO}/${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json",
+      "User-Agent": "lomianki-united-admin",
+      ...(body ? { "Content-Type": "application/json" } : {})
+    },
+    body: body ? JSON.stringify(body) : undefined
   });
-  if (!res.ok) throw new Error(`GitHub: zapis ${path} nie powiódł się (${res.status})`);
-  return (await res.json()).commit.sha;
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) { const e = new Error(`GitHub: ${method} ${path.split("/")[1]} (${res.status})`); e.status = res.status; throw e; }
+  return json;
+}
+
+// Wgrywa obrazek jako „blob” (bez commita) – commit robi dopiero zapis danych
+const createBlob = async (base64) => (await gh("POST", "git/blobs", { content: base64, encoding: "base64" })).sha;
+
+// entries: [{ path, sha }] (wgrane wcześniej bloby) albo [{ path, content }] (tekst)
+async function commitFiles(entries, message) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const ref = await gh("GET", `git/ref/heads/${BRANCH}`);
+    const head = ref.object.sha;
+    const base = await gh("GET", `git/commits/${head}`);
+    const tree = await gh("POST", "git/trees", {
+      base_tree: base.tree.sha,
+      tree: entries.map((e) => ({ path: e.path, mode: "100644", type: "blob", ...(e.sha ? { sha: e.sha } : { content: e.content }) }))
+    });
+    const commit = await gh("POST", "git/commits", { message, tree: tree.sha, parents: [head] });
+    try {
+      await gh("PATCH", `git/refs/heads/${BRANCH}`, { sha: commit.sha });
+      return commit.sha;
+    } catch (e) {
+      if (e.status !== 422 || attempt) throw e;   // ktoś zapisał w międzyczasie – próbujemy jeszcze raz
+    }
+  }
+}
+
+// Ścieżka wgranego bloba musi leżeć w folderze, do którego dana rola ma dostęp
+function cleanBlobs(blobs, dirs) {
+  if (blobs === undefined) return [];
+  if (!Array.isArray(blobs) || blobs.length > 300) throw new Error("Za dużo plików w jednym zapisie");
+  return blobs.map((b) => {
+    if (!b || !isStr(b.sha, 40) || !/^[0-9a-f]{40}$/.test(b.sha) || !isStr(b.path, 140)) throw new Error("Zły plik");
+    const dir = Object.keys(IMAGE_DIRS).find((k) => b.path.startsWith(IMAGE_DIRS[k]));
+    if (!dir || !dirs.includes(dir) || !/^assets\/img\/[a-z]+\/[a-z0-9-]{1,80}\.(png|jpg|webp)$/.test(b.path)) {
+      const e = new Error("To hasło nie ma uprawnień do tego folderu."); e.status = 403; throw e;
+    }
+    return { path: b.path, sha: b.sha };
+  });
 }
 
 module.exports = async function handler(req, res) {
@@ -126,19 +228,39 @@ module.exports = async function handler(req, res) {
     await new Promise((r) => setTimeout(r, 800));   // spowalnia zgadywanie hasła
     return res.status(401).json({ error: "Złe hasło" });
   }
-  if (body.action === "check") return res.status(200).json({ ok: true });
+  if (body.action === "check") return res.status(200).json({ ok: true, role: who.role });
+  const allowed = ROLES[who.role];
+  const deny = () => res.status(403).json({ error: "To hasło nie ma uprawnień do tej części strony." });
 
   try {
-    const data = cleanData(body.data);
-    const logo = cleanLogo(body.logo);
-    if (logo) await putFile(logo.path, logo.base64, `Panel admina (${who}): logo ${logo.path.split("/").pop()}`);
-    const json = JSON.stringify(data, null, 2) + "\n";
-    const commit = await putFile(DATA_PATH, Buffer.from(json, "utf8").toString("base64"), `Panel admina (${who}): aktualizacja wyników i statystyk`);
-    return res.status(200).json({ ok: true, commit, logo: logo ? logo.path : null });
+    // 1) Wgranie pojedynczego obrazka (np. kolejnego zdjęcia z galerii) – bez commita
+    if (body.action === "upload") {
+      const img = body.image;
+      if (!img || !allowed.dirs.includes(img.dir)) return deny();
+      const image = cleanImage(img);
+      return res.status(200).json({ ok: true, path: image.path, sha: await createBlob(image.base64) });
+    }
+
+    // 2) Zapis danych + wszystkich wgranych obrazków jednym commitem
+    const target = body.target || "wyniki";
+    if (!TARGETS[target]) throw new Error("Nieznany plik do zapisu");
+    const img = body.image || body.logo;
+    if (!allowed.targets.includes(target) || (img && !allowed.dirs.includes(img.dir || "rywale"))) return deny();
+    const data = target === "sklep" ? cleanShop(body.data) : target === "aktualnosci" ? cleanNews(body.data) : cleanData(body.data);
+    const entries = cleanBlobs(body.blobs, allowed.dirs);
+    const image = cleanImage(img);
+    if (image) entries.push({ path: image.path, sha: await createBlob(image.base64) });
+    entries.push({ path: TARGETS[target], content: JSON.stringify(data, null, 2) + "\n" });
+    const what = { sklep: "sklep", aktualnosci: "aktualności", wyniki: "wyniki i statystyki" }[target];
+    const files = entries.length - 1;
+    const commit = await commitFiles(entries, `Panel admina (${who.label}): ${what}${files ? ` (+${files} ${files === 1 ? "obrazek" : "obrazków"})` : ""}`);
+    return res.status(200).json({ ok: true, commit, image: image ? image.path : null });
   } catch (e) {
-    return res.status(400).json({ error: e.message });
+    return res.status(e.status === 403 ? 403 : 400).json({ error: e.message });
   }
 };
 
 module.exports.cleanData = cleanData;
-module.exports.cleanLogo = cleanLogo;
+module.exports.cleanShop = cleanShop;
+module.exports.cleanNews = cleanNews;
+module.exports.cleanImage = cleanImage;

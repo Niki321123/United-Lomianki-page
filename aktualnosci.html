@@ -48,6 +48,14 @@
     <div id="news-dialog-body"></div>
   </dialog>
 
+  <dialog class="photo-viewer" id="photo-viewer" aria-label="Zdjęcie z galerii">
+    <form method="dialog"><button class="dialog-close" aria-label="Zamknij">×</button></form>
+    <img id="photo-viewer-img" alt="">
+    <button class="photo-nav photo-prev" type="button" id="photo-prev" aria-label="Poprzednie zdjęcie">‹</button>
+    <button class="photo-nav photo-next" type="button" id="photo-next" aria-label="Następne zdjęcie">›</button>
+    <p class="photo-count" id="photo-viewer-count" aria-live="polite"></p>
+  </dialog>
+
   <noscript>
     <p class="noscript">Włącz JavaScript, aby zobaczyć treść strony.</p>
   </noscript>

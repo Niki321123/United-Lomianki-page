@@ -41,13 +41,17 @@
   }
 
   /* ---------- Logowanie ---------- */
+  let role = "admin";   // "admin" = wszystko, "news" = tylko aktualności (decyduje serwer)
+
   async function login(pw) {
     password = pw;
     setMsg("#login-msg", "Sprawdzam…");
     try {
-      await api({ action: "check" });
+      const r = await api({ action: "check" });
+      role = r.role || "admin";
       store.set("lu-admin", pw);
       $("#login-form").hidden = true;
+      applyRole();
       await loadData();
       $("#editor").hidden = false;
     } catch (e) {
@@ -59,6 +63,8 @@
   if (saved) login(saved);
 
   async function loadData() {
+    if (window.AdminNews) await window.AdminNews.load();
+    if (role !== "admin") return;          // admin aktualności nie potrzebuje reszty
     const res = await fetch("data/wyniki.json", { cache: "no-store" });
     data = await res.json();
     data.fixtures = data.fixtures || [];
@@ -67,17 +73,29 @@
     $("#opponents").innerHTML = [...new Set(data.fixtures.map((f) => f.opponent))]
       .map((o) => `<option value="${esc(o)}"></option>`).join("");
     renderMatches(); renderStats(); renderRecord();
+    if (window.AdminShop) await window.AdminShop.load();
   }
 
-  /* ---------- Zakładki ---------- */
-  const tabs = [...document.querySelectorAll(".admin-tabs [role=tab]")];
-  tabs.forEach((t) => t.addEventListener("click", () => {
-    tabs.forEach((x) => {
+  /* ---------- Zakładki (widoczne zależnie od roli) ---------- */
+  function allTabs() { return [...document.querySelectorAll(".admin-tabs [role=tab]")]; }
+  function selectTab(t) {
+    allTabs().forEach((x) => {
       const on = x === t;
       x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1;
       $("#" + x.getAttribute("aria-controls")).hidden = !on;
     });
-  }));
+  }
+  function applyRole() {
+    const visible = allTabs().filter((t) => {
+      const flagOff = t.dataset.flag && !(window.CLUB && window.CLUB[t.dataset.flag]);   // np. sklep wyłączony w data.js
+      const ok = t.dataset.roles.split(" ").includes(role) && !flagOff;
+      t.hidden = !ok;
+      return ok;
+    });
+    selectTab(visible[0]);
+    $("#admin-role").textContent = role === "admin" ? "Zalogowano jako: pełny admin" : "Zalogowano jako: admin aktualności";
+  }
+  allTabs().forEach((t) => t.addEventListener("click", () => selectTab(t)));
 
   /* ---------- Mecze ---------- */
   const knownLogos = () => {
@@ -256,26 +274,43 @@
   });
 
   /* ---------- Zapis ---------- */
-  $("#save").addEventListener("click", async () => {
+  async function saveResults() {
     const bad = data.fixtures.find((f) => !f.opponent || !/^\d{4}-\d{2}-\d{2}/.test(f.date));
-    if (bad) return setMsg("#save-msg", "Uzupełnij datę i nazwę rywala w każdym meczu.", "error");
+    if (bad) throw new Error("Uzupełnij datę i nazwę rywala w każdym meczu.");
+    // nazwa pliku logo z aktualnej nazwy rywala (mogła się zmienić po wgraniu)
+    if (pendingLogo) {
+      const f = data.fixtures[pendingLogo.index];
+      pendingLogo.slug = slugify(f.opponent);
+      f.logo = `assets/img/rywale/${pendingLogo.slug}.png`;
+    }
+    const logo = pendingLogo ? { dir: "rywale", slug: pendingLogo.slug, ext: "png", base64: pendingLogo.base64 } : null;
+    await api({ target: "wyniki", data, image: logo });
+    pendingLogo = null; dirty = false;
+  }
+
+  const shop = () => window.AdminShop;
+  $("#save").addEventListener("click", async () => {
+    const jobs = [];
+    if (dirty) jobs.push(saveResults);
+    if (shop() && shop().isDirty()) jobs.push(shop().save);
+    if (window.AdminNews && window.AdminNews.isDirty()) jobs.push(window.AdminNews.save);
+    if (!jobs.length) return setMsg("#save-msg", "Brak zmian do zapisania.");
     const btn = $("#save"); btn.disabled = true;
     setMsg("#save-msg", "Zapisuję…");
     try {
-      // nazwa pliku logo z aktualnej nazwy rywala (mogła się zmienić po wgraniu)
-      if (pendingLogo) {
-        const f = data.fixtures[pendingLogo.index];
-        pendingLogo.slug = slugify(f.opponent);
-        f.logo = `assets/img/rywale/${pendingLogo.slug}.png`;
-      }
-      const logo = pendingLogo ? { slug: pendingLogo.slug, ext: "png", base64: pendingLogo.base64 } : null;
-      await api({ data, logo });
-      pendingLogo = null; dirty = false;
+      for (const job of jobs) await job();
       setMsg("#save-msg", "Zapisano ✓ Strona zaktualizuje się za około minutę.", "ok");
     } catch (e) {
       setMsg("#save-msg", e.message, "error");
     } finally { btn.disabled = false; }
   });
 
-  window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+  window.addEventListener("beforeunload", (e) => {
+    if (dirty || (shop() && shop().isDirty()) || (window.AdminNews && window.AdminNews.isDirty())) {
+      e.preventDefault(); e.returnValue = "";
+    }
+  });
+
+  // Wspólne narzędzia dla edytora sklepu (admin-shop.js)
+  window.Admin = { api, esc, slugify, setMsg, $ };
 })();

@@ -1,6 +1,7 @@
 /* ============================================================
    ŁOMIANKI UNITED — renderowanie treści
-   Stałe treści: assets/js/data.js. Wyniki i statystyki: data/wyniki.json
+   Stałe treści: assets/js/data.js. Wyniki i statystyki: data/wyniki.json,
+   aktualności: data/aktualnosci.json
    (edytowane w panelu admin.html). Nie edytuj tego pliku, żeby zmienić treść.
    ============================================================ */
 (function () {
@@ -9,12 +10,11 @@
   const club = window.CLUB;
   if (!club) return;
 
-  // Wyniki, bilans i statystyki doczytujemy z JSON-a (zawsze świeża wersja)
-  const EMPTY = { record: { w: 0, d: 0, l: 0 }, fixtures: [], playerStats: {} };
-  fetch("data/wyniki.json", { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null)
-    .then((data) => { Object.assign(club, EMPTY, data || {}); run(); });
+  // Wyniki, statystyki i aktualności doczytujemy z JSON-ów (zawsze świeża wersja)
+  const EMPTY = { record: { w: 0, d: 0, l: 0 }, fixtures: [], playerStats: {}, news: [] };
+  const getJson = (url) => fetch(url, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  Promise.all([getJson("data/wyniki.json"), getJson("data/aktualnosci.json")])
+    .then(([results, news]) => { Object.assign(club, EMPTY, results || {}, news || {}); run(); });
 
   function run() {
 
@@ -288,10 +288,12 @@
     /* ---------- Aktualności ---------- */
     function renderNews() {
       const items = [...club.news].sort((a, b) => b.date.localeCompare(a.date));
+      const coverOf = (n) => n.image || (n.gallery && n.gallery[0]) || "";
       $("#news-list").innerHTML = items.map((n, i) => `
         <article class="news-card reveal">
-          <div class="news-media${n.image ? "" : " news-media--placeholder"}">
-            <img src="${esc(n.image || CREST)}" alt="" loading="lazy">
+          <div class="news-media${coverOf(n) ? "" : " news-media--placeholder"}">
+            <img src="${esc(coverOf(n) || CREST)}" alt="" loading="lazy">
+            ${n.gallery && n.gallery.length ? `<span class="news-count" aria-label="${n.gallery.length} zdjęć w galerii">▣ ${n.gallery.length}</span>` : ""}
           </div>
           <div class="news-body">
             <p class="news-date"><time datetime="${esc(n.date)}">${fmtDate.format(new Date(n.date))}</time></p>
@@ -308,10 +310,45 @@
         const n = items[btn.dataset.news];
         $("#news-dialog-date").textContent = fmtDate.format(new Date(n.date));
         $("#news-dialog-title").textContent = n.title;
-        $("#news-dialog-body").innerHTML = n.body.map((p) => `<p>${esc(p)}</p>`).join("");
+        const photos = n.gallery || [];
+        $("#news-dialog-body").innerHTML =
+          (n.image ? `<img class="news-dialog-cover" src="${esc(n.image)}" alt="">` : "") +
+          n.body.map((p) => `<p>${esc(p)}</p>`).join("") +
+          (photos.length ? `<h3 class="news-gallery-title">Galeria (${photos.length})</h3><ul class="news-gallery">${
+            photos.map((src, k) => `<li><button type="button" data-photo="${k}" aria-label="Powiększ zdjęcie ${k + 1} z ${photos.length}">
+              <img src="${esc(src)}" alt="" loading="lazy"></button></li>`).join("")}</ul>` : "");
+        dialog.currentPhotos = photos;
         dialog.showModal();
       });
-      dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
+      dialog.addEventListener("click", (e) => {
+        if (e.target === dialog) return dialog.close();
+        const ph = e.target.closest("[data-photo]");
+        if (ph) openViewer(dialog.currentPhotos, +ph.dataset.photo);
+      });
+
+      // Przeglądarka zdjęć: strzałki, klawiatura, przesunięcie palcem
+      const viewer = $("#photo-viewer");
+      let list = [], at = 0, touchX = null;
+      const show = () => {
+        $("#photo-viewer-img").src = list[at];
+        $("#photo-viewer-count").textContent = `${at + 1} / ${list.length}`;
+      };
+      const step = (d) => { at = (at + d + list.length) % list.length; show(); };
+      function openViewer(photos, k) { list = photos; at = k; show(); viewer.showModal(); }
+      $("#photo-prev").addEventListener("click", () => step(-1));
+      $("#photo-next").addEventListener("click", () => step(1));
+      viewer.addEventListener("click", (e) => { if (e.target === viewer) viewer.close(); });
+      viewer.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") step(-1);
+        if (e.key === "ArrowRight") step(1);
+      });
+      viewer.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+      viewer.addEventListener("touchend", (e) => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+        touchX = null;
+      });
     }
 
     /* ---------- Sponsorzy ---------- */

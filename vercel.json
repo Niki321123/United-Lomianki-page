@@ -1,0 +1,5 @@
+{
+  "functions": {
+    "api/checkout.js": { "includeFiles": "data/sklep.json" }
+  }
+}
