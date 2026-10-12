@@ -297,5 +297,16 @@
       ]
     }
   ],
-  "playerStats": {}
+  "playerStats": {
+    "socha": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 1
+    },
+    "obluski": {
+      "goals": 0,
+      "assists": 0,
+      "mvp": 1
+    }
+  }
 }
