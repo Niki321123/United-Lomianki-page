@@ -295,6 +295,35 @@
           "a": 0
         }
       ]
+    },
+    {
+      "date": "2026-10-17T14:00",
+      "opponent": "FC Charakterni",
+      "logo": "assets/img/rywale/fc-charakterni.png",
+      "score": [
+        2,
+        10
+      ],
+      "home": false,
+      "venue": "Przasnyska 18a",
+      "competition": "Sparing",
+      "players": [
+        {
+          "id": "jozef",
+          "g": 0,
+          "a": 1
+        },
+        {
+          "id": "bartas",
+          "g": 1,
+          "a": 0
+        },
+        {
+          "id": "sledziu",
+          "g": 1,
+          "a": 0
+        }
+      ]
     }
   ],
   "playerStats": {
