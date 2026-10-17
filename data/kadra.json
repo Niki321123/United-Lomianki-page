@@ -376,6 +376,25 @@
           83
         ]
       }
+    },
+    {
+      "id": "bandura",
+      "number": 23,
+      "name": "Bandura",
+      "position": "DEF",
+      "photo": "assets/img/kadra/23-bandura-mvcoucyb.png",
+      "card": {
+        "rating": 85,
+        "pos": "CB",
+        "stats": [
+          65,
+          75,
+          66,
+          69,
+          85,
+          90
+        ]
+      }
     }
   ],
   "media": [
